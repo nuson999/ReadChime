@@ -1,0 +1,9 @@
+node_modules/
+dist/
+artifacts/
+.tmp/
+*.log
+coverage/
+.env*
+_workspace/
+.playwright-mcp/
