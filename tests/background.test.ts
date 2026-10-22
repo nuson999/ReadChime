@@ -42,7 +42,8 @@ beforeEach(async () => {
       onStartup: { addListener: (value: () => void) => { startup = value; } }, onInstalled: basicEvent() },
     storage: { local: { get: async () => ({ [STORAGE_KEY]: data }), set: async (record: Record<string, State>) => { data = structuredClone(record[STORAGE_KEY]); } },
       session: { get: async () => structuredClone(transient), set: async (record: Record<string, unknown>) => Object.assign(transient, structuredClone(record)) } },
-    action: { openPopup: vi.fn(async () => undefined) },
+    action: { openPopup: vi.fn(async () => undefined), setBadgeText: vi.fn(async () => undefined), setBadgeBackgroundColor: vi.fn(async () => undefined),
+      setBadgeTextColor: vi.fn(async () => undefined), setTitle: vi.fn(async () => undefined) },
     alarms: { get: async (name: string) => alarms.get(name), create: (name: string, info: { when?: number }) => { alarms.set(name, { name, scheduledTime: info.when ?? Date.now() + 60000 }); }, clear: async (name: string) => alarms.delete(name), onAlarm: basicEvent() },
     tabs: { get: async () => ({ id: 1, windowId: 1, active: true, url: book?.url }), query: async () => [{ id: 1, windowId: 1, active: true, url: book?.url }],
       update: async () => ({ id: 1, windowId: 1, active: true, url: book?.url }), create: vi.fn(async () => ({ id: 1, windowId: 1 })),
@@ -178,6 +179,14 @@ describe('실제 백그라운드 배선과 저장소 통합', () => {
     vi.mocked(fake.windows.get).mockImplementation(async windowId => ({ id: windowId, focused: windowId === 2, state: 'normal' }) as Awaited<ReturnType<typeof fake.windows.get>>);
     await listener(observation, { id: runtimeId, url: tab.url, tab });
     expect((await state()).active).toMatchObject({ id, tabId: 2, windowId: 2, status: 'running' });
+  });
+  it('도구 모음 배지가 기록 중·일시정지·종료 상태를 따라간다', async () => {
+    const lastBadge = () => vi.mocked(fake.action.setBadgeText).mock.calls.at(-1)?.[0].text;
+    await send({ type: 'START', id: book.id }); expect(lastBadge()).toBe('REC');
+    expect(vi.mocked(fake.action.setTitle).mock.calls.at(-1)?.[0].title).toContain('테스트 도서');
+    await send({ type: 'PAUSE' }); expect(lastBadge()).toBe('II');
+    await send({ type: 'STOP' }); expect(lastBadge()).toBe('');
+    expect(vi.mocked(fake.action.setTitle).mock.calls.at(-1)?.[0].title).toBeNull();
   });
   it('명시적 일시정지 후에는 관측만으로 재개되지 않는다', async () => {
     await send({ type: 'START', id: book.id }); await send({ type: 'PAUSE' }); vi.setSystemTime(Date.now() + 5000); await beat();

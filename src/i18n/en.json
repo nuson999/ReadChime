@@ -377,6 +377,7 @@
   "Play Books에서 책을 열면 시작 안내 팝업 표시": "Show a start prompt when a book opens in Play Books",
   "진행 중인 독서가 바뀌었습니다. 책 화면에서 다시 시도하세요.": "The reading session has changed. Try again from the book page.",
   "독서 일시정지": "Reading paused",
+  "독서 기록 중": "Recording reading time",
   "안내 접기": "Collapse prompt",
   "독서가 일시정지되었습니다. 준비되면 읽기를 재개하세요.": "Reading is paused. Resume when you are ready.",
   "책이 보이면 다른 앱에서 메모해도 측정합니다. 책을 숨겼다가 5초 안에 돌아오면 자동으로 이어집니다. 5초가 지나면 읽기 재개를 눌러 주세요.": "Time counts while the book is visible, even when taking notes in another app. Return within 5 seconds to continue automatically; after that, press Resume reading.",

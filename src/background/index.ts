@@ -15,7 +15,7 @@ import { ReaderPrompts } from './reader-prompts';
 
 const repository = new LocalRepository({
   async get() { return (await browser.storage.local.get(STORAGE_KEY))[STORAGE_KEY]; },
-  async set(state) { await browser.storage.local.set({ [STORAGE_KEY]: state }); },
+  async set(state) { await browser.storage.local.set({ [STORAGE_KEY]: state }); void badge(state); },
 });
 const libraryImporter = new LibraryImporter(repository);
 const readerPrompts = new ReaderPrompts();
@@ -36,10 +36,33 @@ function finalize(state: State, interrupted: boolean) {
   if (book && sessions.length) { book.lastReadAt = sessions.at(-1)!.endedAt; book.updatedAt = new Date().toISOString(); }
   state.active = null;
 }
+// The toolbar badge mirrors the stopwatch so recording is visible without opening the popup.
+let badgeKey: string | undefined;
+async function badge(state: State) {
+  const active = state.active; const locale = resolveLanguage(state.settings.language);
+  const key = active ? `${active.status}|${active.bookTitle}|${locale}` : '';
+  if (key === badgeKey) return;
+  badgeKey = key;
+  try {
+    if (!active) {
+      await Promise.all([browser.action.setBadgeText({ text: '' }), browser.action.setTitle({ title: null })]);
+      return;
+    }
+    const running = active.status === 'running';
+    const label = translate(running ? '독서 기록 중' : '독서 일시정지', [], locale);
+    await Promise.all([
+      browser.action.setBadgeText({ text: running ? 'REC' : 'II' }),
+      browser.action.setBadgeBackgroundColor({ color: running ? '#d93025' : '#6b7280' }),
+      browser.action.setBadgeTextColor({ color: '#ffffff' }),
+      browser.action.setTitle({ title: `ReadChime · ${label} · ${active.bookTitle}` }),
+    ]);
+  } catch { badgeKey = undefined; }
+}
 function updateLastReads(state: State) {
   for (const book of state.books) book.lastReadAt = state.sessions.filter(s => s.bookId === book.id).sort((a, b) => b.endedAt.localeCompare(a.endedAt))[0]?.endedAt;
 }
 const ready = repository.read().then(async state => {
+  await badge(state);
   if (state.active) await repository.update(draft => {
     const old = draft.active!;
     if (old.status === 'running' && (!old.evidence || Date.now() - old.evidence.at > MAX_EVIDENCE_GAP_MS)) finalize(draft, true);
