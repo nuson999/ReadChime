@@ -1,4 +1,4 @@
-# ReadChime 0.2.4: notes for Mozilla reviewers
+# ReadChime 0.2.5: notes for Mozilla reviewers
 
 Requested channel: **unlisted / self-distributed**. The developer intends personal
 use and does not request a public AMO listing. This is a Firefox desktop extension.
@@ -40,17 +40,19 @@ source. Real Google reading requires the user's own account and access to a book
 We do not provide or embed user credentials. Automated browser smoke tests use
 synthetic outer reader/library metadata rather than authenticated private books.
 
-Validation before packaging: 81 unit/integration tests, strict TypeScript,
+Validation before packaging: 82 unit/integration tests, strict TypeScript,
 ESLint, build/resource/size-budget checks, and Firefox extension lint. Firefox 158.0.1 smoke
 tests cover reader prompts, the five-second grace period, collapsible resume UI,
 trusted resume clicks, and continued counting in a visible unfocused window,
 plus keyboard navigation of the statistics calendar.
 Current authenticated Google reader layouts and actual cross-application window
 occlusion have not been verified. Version 0.2.1 permanent signed installation and
-restart persistence were verified in an isolated profile; a signed 0.2.4
-package does not exist yet. Version 0.2.4 changes only user-facing Korean
-wording (and removes unused message strings); permissions, extension ID,
-behavior, and data handling are unchanged from 0.2.3.
+restart persistence were verified in an isolated profile; a signed 0.2.5
+package does not exist yet. Version 0.2.5 adds a toolbar badge that mirrors the
+reading stopwatch (red "REC" while time is counted, grey "II" while a session is
+paused or waiting) and names the book in the button tooltip. It uses only the
+`browser.action` badge/title APIs from the background script; permissions,
+extension ID, the content script, and data handling are unchanged from 0.2.4.
 
 `web-ext lint` reports two `UNSAFE_VAR_ASSIGNMENT` warnings inside the bundled
 React DOM dependency. Application code does not use `dangerouslySetInnerHTML`,
