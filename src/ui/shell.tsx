@@ -34,12 +34,25 @@ export function useAppState({ popup = false } = {}) {
     }, []);
     useEffect(() => {
         void refresh();
-        const interval = setInterval(() => void refresh(), 5000);
+        // Stored state (including the running timer) arrives via storage.onChanged. Reader detection
+        // and the next alarm live only in the background, so re-read them when the page comes back.
         const changed = () => void refresh();
+        const visible = () => { if (document.visibilityState === 'visible') void refresh(); };
         if (extensionAvailable())
             browser.storage.onChanged.addListener(changed);
-        return () => { clearInterval(interval); if (extensionAvailable())
-            browser.storage.onChanged.removeListener(changed); };
+        document.addEventListener('visibilitychange', visible);
+        window.addEventListener('focus', changed);
+        // Re-render just after local midnight so "today" totals roll over on a page left open.
+        let midnight: ReturnType<typeof setTimeout>;
+        const scheduleMidnight = () => { const next = new Date(); next.setHours(24, 0, 1, 0); midnight = setTimeout(() => { void refresh(); scheduleMidnight(); }, next.getTime() - Date.now()); };
+        scheduleMidnight();
+        return () => {
+            clearTimeout(midnight);
+            if (extensionAvailable())
+                browser.storage.onChanged.removeListener(changed);
+            document.removeEventListener('visibilitychange', visible);
+            window.removeEventListener('focus', changed);
+        };
     }, [refresh]);
     useEffect(() => {
         const media = matchMedia('(prefers-color-scheme: dark)');
