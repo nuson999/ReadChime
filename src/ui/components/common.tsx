@@ -8,7 +8,6 @@ export type Section = keyof typeof sections;
 export const statusNames: Record<Book['status'], string> = { planned: '읽을 책', reading: '읽는 중', completed: '완독', paused: '잠시 멈춤' };
 export const deviceNames: Record<Session['device'], string> = { desktop: '데스크톱', tablet: '태블릿', smartphone: '스마트폰', paper: '종이책', other: '기타' };
 export const navIcons = { home: '⌂', stats: '▥', library: '▤', history: '◷', settings: '⚙' };
-export const isPopup = location.pathname.endsWith('popup.html');
 export function Field({ label, children, hint }: {
     label: string;
     children: ReactNode;
