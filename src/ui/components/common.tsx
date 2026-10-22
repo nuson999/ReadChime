@@ -1,5 +1,5 @@
 import { useI18n } from '../i18n';
-import { type ReactNode } from 'react';
+import { useState, type ButtonHTMLAttributes, type ReactNode } from 'react';
 import { type State, type Book, type Session } from '../../domain/model';
 import { type Detection } from '../../domain/detector';
 import { type Command } from '../../shared/messages';
@@ -38,4 +38,16 @@ export interface SharedProps {
     run: Run;
     busy: boolean;
     detection?: Detection;
+}
+/** A button that disables itself (and only itself) and shows a spinner while its async action runs. */
+export function ActionButton({ onClick, disabled, children, ...rest }: Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onClick'> & {
+    onClick: () => unknown;
+}) {
+    const [pending, setPending] = useState(false);
+    const click = async () => {
+        setPending(true);
+        try { await onClick(); }
+        finally { setPending(false); }
+    };
+    return <button type="button" {...rest} disabled={disabled || pending} aria-busy={pending || undefined} onClick={() => void click()}>{children}</button>;
 }

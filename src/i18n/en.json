@@ -392,5 +392,6 @@
   "안내 접기": "Collapse prompt",
   "독서가 일시정지되었습니다. 준비되면 읽기를 재개하세요.": "Reading is paused. Resume when you are ready.",
   "▶ 읽기 재개": "▶ Resume reading",
-  "책이 보이면 다른 앱에서 메모해도 측정합니다. 책을 숨겼다가 5초 안에 돌아오면 자동으로 이어지고, 넘기면 읽기 재개를 눌러 주세요.": "Time counts while the book is visible, even when taking notes in another app. Return within 5 seconds to continue automatically; after that, press Resume reading."
+  "책이 보이면 다른 앱에서 메모해도 측정합니다. 책을 숨겼다가 5초 안에 돌아오면 자동으로 이어지고, 넘기면 읽기 재개를 눌러 주세요.": "Time counts while the book is visible, even when taking notes in another app. Return within 5 seconds to continue automatically; after that, press Resume reading.",
+  "화살표 키로 날짜를 이동합니다.": "Use the arrow keys to move between days."
 }
