@@ -1,4 +1,5 @@
-@import "tailwindcss";
+@import "tailwindcss" source(none);
+@source "./";
 
 :root { font-family: "Segoe UI", "Malgun Gothic", system-ui, sans-serif; color: #253b34; background: #f6f5ef; --bg:#f6f5ef; --card:#fffefa; --text:#253b34; --muted:#6b7c73; --line:#e4e7de; --green:#326751; --green-soft:#e9f0e6; --accent:#b1884c; --sidebar:#f0f1e8; --error-bg:#fff0e9; --error:#994f32; font-synthesis: none; }
 :root[data-theme="dark"] { color-scheme:dark; color:#e0e7dd; background:#18221e; --bg:#18221e; --card:#202d26; --text:#e0e7dd; --muted:#a3b5a6; --line:#36483b; --green:#a3ceac; --green-soft:#304738; --accent:#d7b47b; --sidebar:#1c2821; --error-bg:#422b25; --error:#f4b799; }

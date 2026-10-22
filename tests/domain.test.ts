@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { parseHTML } from 'linkedom';
 import { readerFixture, libraryFixture } from './fixtures';
 import { emptyState, type Book, type ActiveSession, type Session } from '../src/domain/model';
 import { canonicalBookUrl, readerKey, recommend } from '../src/domain/books';
@@ -17,6 +18,11 @@ function active(): ActiveSession { return { id: crypto.randomUUID(), bookId: cry
 function evidence(at: number, eligible = true, token = 'tab', timezone = 'Asia/Seoul') { return { at, mono: at, token, eligible, timezone }; }
 
 describe('안전한 책 주소와 추천', () => {
+  it('리더 바깥 제목·저자만 읽고 Google 접미사를 제외한다', () => {
+    const document = parseHTML(`<html><head><title>Different book - Google Play Books</title><meta name="author" content="Reader Author"></head><body>${readerFixture}</body></html>`).document;
+    expect(playBooksDetector.detect('https://play.google.com/books/reader?id=another-id', document)).toMatchObject({ key: 'another-id', supported: true, title: 'Different book', author: 'Reader Author' });
+    expect(playBooksDetector.detect('https://play.google.com/books', document)).toMatchObject({ key: null, supported: false });
+  });
   it('리더 주소만 허용하고 추적·페이지 파라미터를 제거한다', () => {
     expect(canonicalBookUrl(' https://play.google.com/books/reader?id=test_123&page=9#foo ')).toBe('https://play.google.com/books/reader?id=test_123');
     for (const url of ['javascript:alert(1)', 'https://play.google.com.evil/books/reader?id=a', 'https://x@play.google.com/books/reader?id=a', 'http://play.google.com/books/reader?id=a', 'https://play.google.com/books', 'https://play.google.com/books/reader', 'https://play.google.com:444/books/reader?id=a']) expect(readerKey(url)).toBeNull();
@@ -29,10 +35,7 @@ describe('안전한 책 주소와 추천', () => {
   it('합성 DOM의 리더 바깥 구조를 홈과 구분한다', () => {
     const reader = readerFixture;
     const library = libraryFixture;
-    const root = (html: string) => ({ querySelector: (selector: string) => {
-      const exists = selector === 'reader-control' ? /<reader-control[\s>]/.test(html) : /<iframe\b[^>]*class="[^"]*-gb-display/.test(html);
-      return exists ? {} as Element : null;
-    } });
+    const root = (html: string) => parseHTML(html).document;
     expect(playBooksDetector.detect('https://play.google.com/books/reader?id=fixture', root(reader)).supported).toBe(true);
     expect(playBooksDetector.detect('https://play.google.com/books', root(reader)).supported).toBe(false);
     expect(playBooksDetector.detect('https://play.google.com/books/reader?id=fixture', root(library)).supported).toBe(false);
@@ -77,10 +80,16 @@ describe('타이머의 보수적인 상태 전이', () => {
     const timer = active(); const base = Date.parse(now); observe(timer, evidence(base)); observe(timer, evidence(base + 5000)); observe(timer, evidence(base + 10000));
     expect(finish(timer, now, false)[0].durationSeconds).toBe(10);
   });
-  it('포커스가 없으면 누적하지 않으며 돌아오면 자동 재개한다', () => {
+  it('잠깐 숨겨진 시간은 제외하고 5초 안에만 버튼 없이 재개한다', () => {
     const timer = active(); const base = Date.parse(now); observe(timer, evidence(base)); observe(timer, evidence(base + 5000, false)); expect(timer.status).toBe('waiting');
-    observe(timer, evidence(base + 600000, false)); observe(timer, evidence(base + 605000)); observe(timer, evidence(base + 610000));
+    observe(timer, evidence(base + 10000)); observe(timer, evidence(base + 15000));
     expect(finish(timer, now, false)[0].durationSeconds).toBe(5); expect(timer.status).toBe('running');
+  });
+  it('5초를 넘게 숨겨지면 복귀 관측으로 일시정지가 풀리지 않는다', () => {
+    const timer = active(); const base = Date.parse(now);
+    observe(timer, evidence(base)); observe(timer, evidence(base + 1000, false));
+    observe(timer, evidence(base + 6001)); observe(timer, evidence(base + 11001));
+    expect(timer.status).toBe('paused'); expect(timer.buckets).toEqual([]);
   });
   it('명시적 일시정지는 포커스 복귀로 풀리지 않는다', () => {
     const timer = active(); const base = Date.parse(now); suspend(timer, true); observe(timer, evidence(base)); observe(timer, evidence(base + 5000)); expect(timer.status).toBe('paused'); expect(timer.buckets).toHaveLength(0);

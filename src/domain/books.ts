@@ -20,3 +20,11 @@ export function recommend(state: Pick<State, 'books' | 'settings'>): Book | unde
     ?? eligible.filter(b => b.lastReadAt).sort((a, b) => (b.lastReadAt ?? '').localeCompare(a.lastReadAt ?? ''))[0]
     ?? eligible.find(b => b.status === 'reading') ?? eligible.find(b => b.status === 'planned');
 }
+
+// Match the stable Google volume ID, ignoring page position and other URL options.
+export function detectedBook(state: Pick<State, 'books' | 'settings'>, key?: string | null): Book | undefined {
+  if (!key) return undefined;
+  const matches = state.books.filter(book => readerKey(book.url) === key);
+  return matches.find(book => book.id === state.settings.currentBookId && !book.archivedAt)
+    ?? matches.find(book => !book.archivedAt) ?? matches[0];
+}

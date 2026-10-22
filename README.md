@@ -6,7 +6,7 @@
 
 ## 한국어 · 하루 한 페이지
 
-Firefox 데스크톱용 로컬 독서 습관 확장 프로그램입니다. 기본 알림은 **현지 시각 22:00**, 하루 목표는 **5분**, 알림 방식은 **책 바로 열기**, 자동 타이머 시작은 **꺼짐**입니다. 한국어와 영어를 지원합니다.
+Firefox 데스크톱용 로컬 독서 습관 확장 프로그램입니다. 기본 알림은 **현지 시각 22:00**, 하루 목표는 **5분**, 알림 방식은 **책 바로 열기**, 책을 열면 **시작 안내 팝업**이 표시되며, **독서 시작 버튼을 누른 뒤에만** 시간을 기록합니다. 한국어와 영어를 지원합니다.
 
 서재, 완료된 독서 기록, 설정은 `browser.storage.local`에 저장됩니다. 서버·계정·텔레메트리·동기화가 없으며 대시보드와 백업은 네트워크 없이 동작합니다. Play Books 책을 여는 기능 자체에는 인터넷과 해당 책에 대한 Google 접근 권한이 필요합니다.
 
@@ -54,6 +54,7 @@ Firefox에서 다음과 같이 설치합니다.
 | `npm run validate:firefox`     | `web-ext lint`로 `dist/` 검사                                                 |
 | `npm run test:firefox`         | 별도 임시 프로필의 헤드리스 Firefox에서 설치·UI·저장·백업·재시작 검증         |
 | `npm run test:firefox:library` | 별도 Firefox와 합성 서재 DOM으로 수동 감지·탭 선택·선택 반영 검증             |
+| `npm run test:firefox:reader`  | 합성 읽기 화면의 URL 대조·시작 안내·버튼·기록 전환 검증                     |
 | `npm run test:firefox:i18n`    | 한국어·영어 화면, 팝업, 오류 안내, 설정·백업·재시작 유지 검증                 |
 | `npm run package`              | 다시 빌드한 뒤 `artifacts/`에 서명 전 ZIP 생성                                |
 
@@ -73,6 +74,10 @@ https://play.google.com/books/reader?id=책_ID
 
 **독서 시작**은 해당 책 탭을 열거나 전면으로 가져온 뒤 타이머를 연결합니다. 지원 구조를 확인하지 못하면 **이 탭에서 실제로 읽고 있습니다**를 체크해 명시적으로 시작할 수 있습니다. 이 경우에도 책 ID가 일치하는 리더 URL이어야 합니다. 홈페이지에서는 타이머를 시작하지 않습니다.
 
+Play Books 읽기 화면을 열면 URL의 책 ID를 등록된 리더 주소와 먼저 대조해 팝업의 책을 자동 선택합니다. 페이지 위치·추적 옵션은 무시하고, 기존 제목·저자·메모는 유지합니다. 등록되지 않은 책은 지원되는 리더 바깥 구조가 확인될 때만 자동 추가합니다. 제목을 아직 확인하지 못하면 임시 ID로 유지하고 나중에 같은 책 정보를 보완하며, 직접 수정한 제목은 덮어쓰지 않습니다.
+
+새 읽기 화면에서는 ReadChime 시작 팝업을 한 번 엽니다. 도구 모음 팝업을 자동으로 열 수 없는 Firefox 환경에서는 책 화면 우측 상단에 같은 시작 안내를 표시합니다. **버튼을 누르기 전에는 기록하지 않습니다.** 완독·잠시 멈춤·제거 상태는 유지하며 **읽기 재개**를 눌렀을 때만 복원합니다. 설정에서 시작 안내를 꺼도 열린 책의 자동 선택과 수동 시작은 계속 사용할 수 있습니다. 기존 백업의 자동 시작 값이 켜져 있어도 즉시 기록하지 않습니다.
+
 ### Play Books 서재에서 선택 가져오기
 
 대시보드의 **내 서재 → Play Books에서 가져오기**를 누릅니다. 기존 **책 추가**와 수동 수정 기능도 그대로 사용할 수 있습니다.
@@ -82,7 +87,7 @@ https://play.google.com/books/reader?id=책_ID
 3. 현재 로드된 서재 그리드에서 **제목·저자·리더 주소**를 읽어 선택 미리보기를 표시합니다. 이 단계에서는 영구 서재에 책을 추가하지 않습니다.
 4. **신규 책 모두 선택** 또는 개별 체크박스로 고르고 **선택한 책 반영하기**를 누릅니다. 제거된 책 복원과 빈 저자 보완은 개별 선택합니다.
 
-**이 기능은 대시보드 버튼을 누를 때만 실행합니다.** 페이지 방문·DOM 변경·브라우저 시작·예약 알람으로 실행하거나 주기적으로 목록을 수집하지 않습니다. 설정의 독서 타이머 자동 시작과는 별개입니다.
+**이 기능은 대시보드 버튼을 누를 때만 실행합니다.** 페이지 방문·DOM 변경·브라우저 시작·예약 알람으로 실행하거나 주기적으로 목록을 수집하지 않습니다. 현재 읽기 탭의 책 한 권을 자동 인식하는 기능과는 별개입니다.
 
 범위는 **현재 로드된 목록**입니다. 화면 아래의 책도 DOM에 로드되어 있으면 포함하지만 Google의 다음 페이지나 ‘모두 표시’ 버튼을 자동으로 누르지 않습니다. 전체가 필요하면 Google에서 직접 해당 표시를 준비한 뒤 다시 감지하세요. 페이지·모두 표시 컨트롤, 잘못된 카드, 중복 카드와 최대 2,000개 카드 제한 여부를 안내하며 전체 서재 수집을 보장하지 않습니다. 로그인 필요·로딩 중·지원하지 않는 화면·현재 목록 0권을 구분합니다. 공개 추천이나 서점 목록은 내 서재로 취급하지 않습니다.
 
@@ -104,14 +109,15 @@ https://play.google.com/books/reader?id=책_ID
 
 ### 타이머의 의미와 한계
 
-- 연결된 책 탭이 활성화되고 해당 Firefox 창이 포커스를 가지며 최소화되지 않았을 때만 계산합니다.
-- 일반 탭·창 전환은 대기 상태로 바뀌고 같은 독서 탭에 돌아오면 자동 재개합니다. 사용자가 누른 일시정지는 직접 재개해야 합니다.
+- 연결된 책 탭이 선택되어 있고 창이 최소화되지 않았으며 페이지가 표시 상태이면 계산합니다. 다른 앱에서 메모하느라 Firefox 포커스가 없어도 계속 측정합니다. 다른 앱이 창을 완전히 덮었는지까지는 정확히 감지하지 못할 수 있습니다.
+- 탭 전환·최소화·페이지 숨김 후 5초 안에 돌아오면 버튼 없이 이어 갑니다. 숨겨진 시간은 합산하지 않습니다. 5초를 넘기거나 직접 일시정지하면 책 페이지 오른쪽 위의 **읽기 재개** 버튼을 눌러야 합니다. 안내는 작은 버튼으로 접을 수 있고 시작 안내 설정과 별개로 표시됩니다.
+- 같은 책 새로고침·서재 왕복·같은 책의 다른 탭으로 직접 이동할 때도 기록과 5초 규칙을 유지합니다. 다른 창에 보이는 책만으로 측정 탭을 바꾸지 않습니다.
 - 마우스나 키보드를 움직이지 않아도 읽을 수 있으므로 입력 활동을 독서 판단에 사용하지 않습니다.
 - 콘텐츠 스크립트가 약 5초마다 보내는 관측과 시각·단조 시계·문서 토큰을 비교하고 확인된 구간을 저장합니다. 백그라운드 `setInterval`에 시간을 맡기지 않습니다.
 - 12초를 넘는 전면 관측 공백, 시계 역행, 시계 간 불일치, 시간대 변경은 불확실한 구간으로 처리합니다. 확인되지 않은 구간은 더하지 않습니다. 브라우저 시작·탭 닫힘·확장 재설치 등 중단 복구에서는 확인된 기록만 남깁니다.
 - 마지막 관측 이후의 몇 초, 포커스 전환 직전 구간 등이 누락될 수 있습니다. 절전 여부를 완벽하게 식별하거나 실제 주의 집중을 측정하지 못합니다. 기록은 **추정 타이머**로 표시하며 수정할 수 있습니다.
 - 동시에 타이머는 하나만 실행됩니다. 5분 미만도 저장하고 목표를 달성해도 자동 종료하지 않습니다. 1초 미만의 세션은 기록하지 않습니다.
-- 종료·중단 뒤에는 자동 시작이 즉시 다시 실행되지 않도록 차단합니다. 직접 시작하거나 설정에서 자동 시작을 껐다 켜면 해제합니다. 이 차단도 저장됩니다.
+- 기록은 언제나 시작 버튼을 눌러 시작합니다. 종료 후 같은 읽기 화면에서는 시작 안내를 반복하지 않습니다. 새로고침과 일반 탭 전환으로 일시정지가 풀리지 않으며, 다른 책으로 이동하면 이전 확인 시간을 저장하고 새 책의 시작 입력을 기다립니다.
 
 감지 근거와 미검증 범위는 [docs/DETECTION.md](docs/DETECTION.md)를 참고하세요.
 
@@ -173,7 +179,9 @@ npm run package
 
 생성된 ZIP은 **서명 전 개발 패키지**입니다. 일반 Firefox에 상시 설치 가능한 서명본이 아닙니다. Mozilla 개발자 허브에서 자체 배포용 비공개(unlisted) 서명을 받아야 합니다. 공개 검색 목록에 올릴 필요는 없습니다. [Mozilla 서명·배포 안내](https://extensionworkshop.com/documentation/publish/signing-and-distribution-overview/)
 
-검토할 파일은 `artifacts/`의 ZIP이며 실제 제출에는 패키지와 필요 시 재현 가능한 빌드 소스가 필요합니다. 빌드는 `npm ci` 후 `npm run build`입니다. 사용자 제공 원본 HTML·자산, `.tmp/` 테스트 프로필, 개인 백업, 비밀 값은 제출 소스에 포함하지 마세요. 이 작업에서는 외부 제출이나 Mozilla 계정 연결을 수행하지 않았습니다.
+**0.2.1 서명본 준비 완료:** `artifacts/readchime-0.2.1-signed.xpi`는 Mozilla가 비공개 서명한 일반 설치용 파일입니다. Firefox에서 `about:addons` → 톱니 메뉴 → **파일에서 부가 기능 설치**로 이 파일을 한 번 설치하세요. 기존 임시 확장은 먼저 삭제하지 않습니다. 별도 Firefox 프로필에서 임시 확장의 데이터를 보존한 채 서명본을 설치하고, 완전 종료·재실행 뒤 재등록 없이 유지되는 것을 확인했습니다. 사용자 기본 프로필의 설치는 직접 진행해야 합니다. [서명 상태와 검증 기록](docs/MOZILLA_SIGNING.md)
+
+검토할 파일은 `artifacts/`의 ZIP이며 실제 제출에는 패키지와 필요 시 재현 가능한 빌드 소스가 필요합니다. 빌드는 `npm ci` 후 `npm run build`입니다. 사용자 제공 원본 HTML·자산, `.tmp/` 테스트 프로필, 개인 백업, 비밀 값은 제출 소스에 포함하지 마세요. 0.2.1은 사용자가 Mozilla 인증·약관 동의·파일 선택을 직접 진행한 뒤 비공개 제출 및 서명이 완료됐습니다.
 
 ### 구조
 
@@ -218,7 +226,7 @@ ReadChime/
 
 ## English · One page a day
 
-ReadChime is a local reading habit extension for **Firefox on desktop**. It combines a personal library, reading reminders, a conservative reading timer, manual entries, and statistics. Defaults are **22:00 device local time**, a **5-minute daily goal**, **open the book directly**, and **automatic timer start off**. The interface supports Korean and English.
+ReadChime is a local reading habit extension for **Firefox on desktop**. It combines a personal library, reading reminders, a conservative reading timer, manual entries, and statistics. Defaults are **22:00 device local time**, a **5-minute daily goal**, **open the book directly**, and **show a reader start prompt**. Time is recorded only after pressing Start. The interface supports Korean and English.
 
 Your library, completed sessions, and settings stay in `browser.storage.local` in the current Firefox profile. There is no server, account, telemetry, or synchronization. The dashboard and backups work offline. Opening a Play Books book requires internet access and the appropriate Google access to that book.
 
@@ -267,6 +275,7 @@ The dashboard is the extension's internal `dashboard.html`. Open it from the pop
 | `npm run validate:firefox`     | Run `web-ext lint` on `dist/`                                                                         |
 | `npm run test:firefox`         | Headless Firefox installation, UI, storage, backup, and restart smoke tests in an isolated profile    |
 | `npm run test:firefox:library` | Library detection, tab selection, and selected import using synthetic library DOM in isolated Firefox |
+| `npm run test:firefox:reader`  | Reader URL matching, page prompt, trusted Start click, and session switching with synthetic reader DOM |
 | `npm run test:firefox:i18n`    | Korean/English settings, screens, popup, errors, backup, and persistence smoke tests                  |
 | `npm run check`                | Typecheck, lint, tests, build/resource checks, and Firefox lint                                       |
 | `npm run package`              | Rebuild and create an unsigned ZIP in `artifacts/`                                                    |
@@ -287,6 +296,10 @@ Enter the title yourself; author, URL, and notes are optional. The homepage, sto
 
 **Start reading** opens or focuses the book tab and links the timer to it. If reader detection fails, you can explicitly select **I am reading in this tab** and try again. The tab must still have a valid reader URL with the matching book ID. A homepage cannot start the timer.
 
+Opening a Play Books reader automatically selects the saved book by matching the URL's Google book ID, ignoring page and tracking options. Existing titles, authors, and notes are kept. A new book is added only after supported outer reader structure is detected. If its title is unavailable, a temporary ID is kept and enriched later without overwriting a user-edited title.
+
+A start popup opens once for a newly encountered reader. If Firefox cannot open the toolbar popup automatically, the same start prompt appears at the top right of the book page. **No time is recorded before you press Start.** Completed, paused, and removed books retain their status until you explicitly choose **Resume reading**. Turning off reader prompts does not disable automatic book selection or manual Start. A legacy enabled auto-start setting never starts recording without a click.
+
 ### Import selected books from Play Books
 
 Choose **My library → Import from Play Books**. Manual book creation and editing remain available.
@@ -296,7 +309,7 @@ Choose **My library → Import from Play Books**. Manual book creation and editi
 3. The preview reads titles, authors, and reader URLs from the currently loaded library grid. Previewing does not add books to your saved library.
 4. Choose individual books or **Select all new books**, then **Apply selected books**. Restoring removed books and filling missing authors require individual selection.
 
-Scanning runs only when you open the import dialog or press its scan controls. Visits, DOM changes, browser startup, and scheduled alarms do not trigger library collection. This is independent of the automatic reading timer setting.
+Scanning runs only when you open the import dialog or press its scan controls. Visits, DOM changes, browser startup, and scheduled alarms do not trigger library collection. This is separate from detecting the single book in the current reader tab.
 
 Only the **currently loaded list** is in scope. Off-screen cards already in the DOM can be included, but ReadChime does not click Google's next-page or Show all controls. Prepare the desired list yourself and scan again. The preview reports pagination controls, invalid/duplicate cards, and whether the 2,000-card limit was reached. It distinguishes login required, loading, unsupported pages, and an empty current list. Public recommendations and store lists are not treated as your library.
 
@@ -318,14 +331,15 @@ Detection rules originated from supplied library HTML. Current automated tests u
 
 ### What the timer measures
 
-- Time counts only while the linked book tab is active in a focused, non-minimized Firefox window.
-- Switching tabs or windows puts the timer in a waiting state. Returning to the same book tab resumes it automatically. A manual pause requires a manual resume.
+- Time counts while the linked book tab is selected in a non-minimized window and the page reports itself visible, including when taking notes in another app. Detecting complete coverage by other applications is not guaranteed.
+- Switching tabs, minimizing, or hiding the page starts a 5-second grace period. Returning within it continues automatically, excluding hidden time. After 5 seconds, or after a manual pause, use **Resume reading** at the top right of the book page. The card collapses to a small resume button and works even with start prompts disabled.
+- Reloading, visiting the library, or directly selecting another tab of the same book preserves the session and the same grace period. Merely visible books in other windows never take over the session.
 - Mouse and keyboard activity are not used to infer reading; you can read without interacting.
 - Content observations arrive about every 5 seconds. Wall time, a monotonic clock, and document tokens are compared, and only confirmed intervals are saved. Background `setInterval` is not the time source.
 - An observation gap over 12 seconds, a clock reversal, clock disagreement, or a time zone change makes the interval uncertain. Unconfirmed time is excluded. Recovery after browser startup, tab closure, or extension reload keeps confirmed records only.
 - A few seconds after the last observation or near a focus change can be missed. Sleep and human attention cannot be measured perfectly. Entries are labeled **Estimated timer** and can be corrected.
 - Only one timer runs at a time. Sessions shorter than 5 minutes count; reaching the daily goal does not stop the timer. Sessions below one second are not recorded.
-- After stopping or interrupting a session, automatic start is blocked until you start manually or toggle automatic start off and on. This block is persisted.
+- Recording always requires a Start button press. Stopping does not repeatedly reopen the start prompt on the same reader. Refreshing or switching tabs does not undo a pause. Opening another book saves the previous confirmed intervals and waits for Start for the new book.
 
 See [detection evidence and limits](docs/DETECTION.md) for the selectors and unverified cases.
 

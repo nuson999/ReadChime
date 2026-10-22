@@ -8,6 +8,7 @@ it('페이지 방문·타이머 관측·포커스 이벤트는 서재를 감지�
   const { document, window } = parseHTML('<gpb-library-home><a class="navbar-item your-books selected"></a><gpb-shelf-page><div class="-gb-book-card-grid"></div></gpb-shelf-page></gpb-library-home>');
   let listener: (message: unknown, sender: Runtime.MessageSender) => unknown = () => undefined;
   vi.stubGlobal('document', document); vi.stubGlobal('window', window); vi.stubGlobal('location', { href: 'https://play.google.com/books' });
+  vi.stubGlobal('MutationObserver', window.MutationObserver);
   vi.stubGlobal('browser', { runtime: { id: 'own-extension', sendMessage: vi.fn(async () => ({})), onMessage: { addListener: (value: typeof listener) => { listener = value; } } } });
   const library = await import('../src/domain/library'); const spy = vi.spyOn(library, 'scanLibraryPage');
   await import('../src/content/index');

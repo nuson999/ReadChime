@@ -376,5 +376,21 @@
   "시스템 (Firefox 언어)": "System (Firefox language)",
   "언어를 선택한 뒤 설정을 저장하세요. 시스템 설정은 Firefox가 한국어이면 한국어, 그 외에는 영어를 사용합니다.": "Choose a language, then save settings. System uses Korean when Firefox is in Korean and English otherwise.",
   "ReadChime · 독서 대시보드": "ReadChime · Reading dashboard",
-  "중단 전 확인된 구간만 저장했습니다.": "Only intervals confirmed before the interruption were saved."
+  "중단 전 확인된 구간만 저장했습니다.": "Only intervals confirmed before the interruption were saved.",
+  "독서를 시작할까요?": "Ready to read?",
+  "책을 감지했습니다. 시작 버튼을 누른 뒤부터 독서 시간을 기록합니다.": "Book detected. Reading time is recorded only after you press Start.",
+  "제목 확인 중": "Checking book title",
+  "읽기 재개": "Resume reading",
+  "책을 다시 읽으려면 읽기 재개를 선택하세요.": "Choose Resume reading to read this book again.",
+  "책 읽기 화면으로 돌아온 뒤 다시 시작하세요.": "Return to the book reader, then try starting again.",
+  "Play Books에서 감지한 책": "Detected in Play Books",
+  "완독·잠시 멈춤·보관 상태를 유지하고 있습니다. 읽기 재개를 누르면 다시 기록합니다.": "This book remains completed, paused, or archived. Choose Resume reading to record again.",
+  "독서 시간은 시작 버튼을 누른 뒤부터 기록합니다. 다른 책을 열면 새 책에서 다시 시작해 주세요.": "Reading time is recorded only after you press Start. When you open another book, press Start for that book.",
+  "Play Books에서 책을 열면 시작 안내 팝업 표시": "Show a start prompt when a book opens in Play Books",
+  "진행 중인 독서가 바뀌었습니다. 책 화면에서 다시 시도하세요.": "The reading session has changed. Try again from the book page.",
+  "독서 일시정지": "Reading paused",
+  "안내 접기": "Collapse prompt",
+  "독서가 일시정지되었습니다. 준비되면 읽기를 재개하세요.": "Reading is paused. Resume when you are ready.",
+  "▶ 읽기 재개": "▶ Resume reading",
+  "책이 보이면 다른 앱에서 메모해도 측정합니다. 책을 숨겼다가 5초 안에 돌아오면 자동으로 이어지고, 넘기면 읽기 재개를 눌러 주세요.": "Time counts while the book is visible, even when taking notes in another app. Return within 5 seconds to continue automatically; after that, press Resume reading."
 }

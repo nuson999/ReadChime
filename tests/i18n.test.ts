@@ -72,7 +72,9 @@ describe('settings and backup compatibility', () => {
     expect(parseBackup(JSON.stringify(raw)).settings.language).toBe('system');
     const legacy = JSON.parse(JSON.stringify(current));
     delete legacy.settings.language;
+    delete legacy.settings.readerPrompt;
     expect(migrate(legacy).settings.language).toBe('system');
+    expect(migrate(legacy).settings.readerPrompt).toBe(true);
     expect(settingsSchema.parse({}).language).toBe('system');
     expect(() => settingsSchema.parse({ language: 'fr' })).toThrow();
   });

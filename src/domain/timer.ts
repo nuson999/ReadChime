@@ -2,6 +2,7 @@ import type { ActiveSession, Bucket, Session } from './model';
 import { localDate, nextDateBoundary } from './time';
 
 export const MAX_EVIDENCE_GAP_MS = 12000;
+export const READING_GRACE_MS = 5000;
 export interface Evidence { at: number; mono: number; token: string; eligible: boolean; timezone: string }
 
 function addInterval(buckets: Bucket[], from: number, to: number, timezone: string): void {
@@ -13,8 +14,9 @@ function addInterval(buckets: Bucket[], from: number, to: number, timezone: stri
     bucket.seconds += (end - cursor) / 1000; bucket.endedAt = new Date(end).toISOString(); cursor = end;
   }
 }
-// Only pairs of timely foreground observations establish a countable interval.
+// Only pairs of timely visible observations establish a countable interval.
 export function observe(active: ActiveSession, evidence: Evidence): 'ok' | 'interrupted' {
+  expireAway(active, evidence.at);
   const previous = active.evidence;
   if (previous) {
     const elapsed = evidence.at - previous.at; const monotonic = evidence.mono - previous.mono;
@@ -24,11 +26,28 @@ export function observe(active: ActiveSession, evidence: Evidence): 'ok' | 'inte
     }
   }
   active.evidence = evidence;
-  if (active.status !== 'paused') active.status = evidence.eligible ? 'running' : 'waiting';
+  if (active.status !== 'paused') {
+    if (evidence.eligible) { active.status = 'running'; delete active.awaySince; }
+    else leave(active, evidence.at);
+  }
   return 'ok';
 }
 export function suspend(active: ActiveSession, explicit = false): void {
   active.status = explicit ? 'paused' : active.status === 'paused' ? 'paused' : 'waiting'; active.evidence = null;
+  if (explicit) delete active.awaySince;
+}
+export function leave(active: ActiveSession, at: number): void {
+  if (active.status === 'paused') return;
+  active.awaySince ??= at;
+  suspend(active);
+  expireAway(active, at);
+}
+export function expireAway(active: ActiveSession, at: number): void {
+  if (active.awaySince !== undefined && (at - active.awaySince > READING_GRACE_MS || at < active.awaySince)) suspend(active, true);
+}
+export function resume(active: ActiveSession): void {
+  delete active.awaySince;
+  active.status = 'waiting'; active.evidence = null;
 }
 export function finish(active: ActiveSession, now: string, interrupted: boolean): Session[] {
   return active.buckets.filter(b => Math.floor(b.seconds) > 0).map((b, index) => ({

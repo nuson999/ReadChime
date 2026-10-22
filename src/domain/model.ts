@@ -11,6 +11,7 @@ export const bookSchema = z.object({
   id, title: z.string().trim().min(1).max(300), author: z.string().max(200).default(''),
   url: z.string().max(2048).default(''), status: z.enum(['planned', 'reading', 'completed', 'paused']),
   notes: note, createdAt: instant, updatedAt: instant, lastReadAt: instant.optional(), archivedAt: instant.optional(),
+  pendingTitle: z.boolean().optional(), pendingAuthor: z.boolean().optional(),
 });
 export const settingsSchema = z.object({
   language: z.enum(['system', 'ko', 'en']).default('system'),
@@ -18,7 +19,9 @@ export const settingsSchema = z.object({
   minute: z.number().int().min(0).max(59).default(0), goalMinutes: z.number().int().min(1).max(1440).default(5),
   reminderMode: z.enum(['direct', 'gentle']).default('direct'),
   snoozeMinutes: z.number().int().min(1).max(120).default(10),
+  // autoStart is retained for old backups; recording always requires a button now.
   graceMinutes: z.number().int().min(0).max(720).default(120), autoStart: z.boolean().default(false),
+  readerPrompt: z.boolean().default(true),
   theme: z.enum(['system', 'light', 'dark']).default('system'), currentBookId: id.nullable().default(null),
 });
 export const sessionSchema = z.object({
@@ -37,6 +40,7 @@ export const activeSchema = z.object({
   id, bookId: id, bookTitle: z.string(), startedAt: instant, tabId: z.number().int(), windowId: z.number().int(),
   status: z.enum(['running', 'waiting', 'paused']), manualConfirmed: z.boolean(), automaticStart: z.boolean(),
   buckets: z.array(bucketSchema),
+  awaySince: z.number().finite().optional(),
   evidence: z.object({ at: z.number(), mono: z.number(), token: z.string(), eligible: z.boolean(), timezone: z.string() }).nullable(),
 });
 export const reminderSchema = z.object({

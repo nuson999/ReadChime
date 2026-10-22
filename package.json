@@ -1,6 +1,6 @@
 {
   "name": "readchime",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "private": true,
   "type": "module",
   "engines": {
@@ -19,6 +19,7 @@
     "test:firefox": "node scripts/smoke-firefox.mjs",
     "test:firefox:library": "node scripts/smoke-library-firefox.mjs",
     "test:firefox:i18n": "node scripts/smoke-i18n-firefox.mjs",
+    "test:firefox:reader": "node scripts/smoke-reader-firefox.mjs",
     "package": "npm run build && web-ext build --source-dir dist --artifacts-dir artifacts --filename readchime-{version}.zip --overwrite-dest",
     "check": "npm run typecheck && npm run lint && npm test && npm run build && npm run validate:firefox"
   },
