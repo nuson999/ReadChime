@@ -1,5 +1,30 @@
 # Mozilla unlisted signing checkpoint
 
+## Version 0.2.4 prepared for manual upload (2026-10-23)
+
+Built from branch `feat/ui-perf-polish`. The user will upload this update
+directly; nothing has been uploaded by the agent. Use the existing unlisted
+add-on, not a new registration:
+
+`https://addons.mozilla.org/ko/developers/addon/e82fa53c1dda474d995b/versions/submit/`
+
+- Extension: `artifacts/readchime-0.2.4.zip` (SHA-256 `F69B74EB…17C8C29B`).
+- Matching source: `artifacts/readchime-0.2.4-source.zip` (67 allowlisted files, SHA-256 `F0DDA931…6A9FB752`).
+- Release notes: `docs/RELEASE_NOTES_0.2.4.md`.
+- Rebuild evidence: `artifacts/readchime-0.2.4-reproducibility.json`.
+
+The source archive was extracted into a new folder and built with a fresh
+`npm ci` and `npm run build` (Node.js 24.22.1, npm 11.19.1); all 16 packaged
+files match by SHA-256. The source ZIP holds committed file contents only and
+must be created with `git -c core.autocrlf=false archive`: with the default
+`core.autocrlf=true`, Git writes CRLF line endings into the archive, and six
+copied text files (HTML, manifest, locales, icon) no longer match the package.
+The build-environment line in `MOZILLA_BUILD.md` was updated after the rebuild;
+it is not a build input. `npm run check` passed (81 tests, zero web-ext lint
+errors, the same two bundled React DOM warnings), and all four Firefox smoke
+tests passed. Only Korean wording changed; extension ID and permissions are
+unchanged.
+
 ## Version 0.2.3 prepared for manual upload (2026-10-22)
 
 Built from branch `feat/ui-perf-polish`. The user will upload this update
