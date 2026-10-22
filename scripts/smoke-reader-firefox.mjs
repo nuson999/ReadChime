@@ -79,7 +79,7 @@ try {
   const sessionId = current.active.id;
   checked('실제 시작 버튼 클릭 후 측정, 숨김 5초 초과 시 일시정지·숨김 시간 제외');
   await driver.switchTo().window(reader); panel = await prompt();
-  assert.equal(await (await panel.findElement(By.css('button.primary'))).getText(), '▶ 읽기 재개');
+  assert.equal(await (await panel.findElement(By.css('button.primary'))).getText(), '읽기 재개');
   await writeFile(path.join(temporary, 'reader-resume-card.png'), await driver.takeScreenshot(), 'base64');
   await (await panel.findElement(By.css('header button'))).click();
   assert.equal(await (await panel.findElement(By.css('section'))).getAttribute('class'), 'compact');
@@ -114,7 +114,7 @@ try {
   await command({ type: 'SAVE_SETTINGS', settings: { ...current.settings, readerPrompt: false } });
   await command({ type: 'PAUSE' });
   await driver.switchTo().window(reader); panel = await prompt();
-  assert.equal(await (await panel.findElement(By.css('button.primary'))).getText(), '▶ 읽기 재개');
+  assert.equal(await (await panel.findElement(By.css('button.primary'))).getText(), '읽기 재개');
   await (await panel.findElement(By.css('button.primary'))).click();
   await driver.wait(async () => (await driver.findElements(By.id('readchime-reader-prompt'))).length === 0, 5000);
   current = await state(); assert.equal(current.active.id, sessionId); assert.notEqual(current.active.status, 'paused');
@@ -139,7 +139,7 @@ try {
   await driver.sleep(3500);
   current = await state(); assert.equal(current.active, null);
   const native = await driver.executeAsyncScript(`const done=arguments[arguments.length-1];browser.storage.session.get('qa-native-popup').then(value=>done(value['qa-native-popup']));`);
-  assert.equal(native?.title, '도구 모음 팝업 검증 책'); assert.equal(native?.button, '▶ 독서 시작');
+  assert.equal(native?.title, '도구 모음 팝업 검증 책'); assert.equal(native?.button, '독서 시작');
   checked('실제 Firefox 도구 모음 팝업 자동 열기·현재 책 표시·시작 버튼과 클릭 전 대기');
   await writeFile(path.join(temporary, 'reader-firefox-qa.json'), JSON.stringify({ checkedAt: new Date().toISOString(), browserVersion: (await driver.getCapabilities()).get('browserVersion'), checks,
     limitations: ['로그인한 실제 책 DOM은 검증하지 않았습니다. 허용된 Google origin에서 리더 바깥 구조·제목만 합성했습니다.', '페이지 내 팝업 경로는 도구 모음 API를 테스트에서 실패시켜 검증하고, 마지막에는 실제 도구 모음 API와 팝업 문서도 확인했습니다.'], profile, popup }, null, 2));

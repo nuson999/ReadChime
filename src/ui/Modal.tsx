@@ -1,4 +1,5 @@
 import { useI18n } from './i18n';
+import { Icon } from './components/Icon';
 import { useEffect, useId, type ReactNode } from 'react';
 export function Modal({ title, children, close, wide = false }: {
     title: string;
@@ -35,7 +36,7 @@ export function Modal({ title, children, close, wide = false }: {
     return <div className="modal-overlay" onMouseDown={event => { if (event.target === event.currentTarget)
         close(); }}>
     <section role="dialog" aria-modal="true" aria-labelledby={titleId} className={`modal${wide ? ' modal-wide' : ''}`}>
-      <div className="section-heading"><h2 id={titleId}>{title}</h2><button className="icon-button" aria-label={t("닫기")} onClick={close}>×</button></div>
+      <div className="section-heading"><h2 id={titleId}>{title}</h2><button className="icon-button" aria-label={t("닫기")} onClick={close}><Icon name="close" size={20}/></button></div>
       {children}
     </section>
   </div>;

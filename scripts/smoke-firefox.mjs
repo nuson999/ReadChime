@@ -68,6 +68,11 @@ try {
   checked('태블릿 수동 기록 UI와 5분 저장');
   await driver.findElement(By.css('nav a[href="#stats"]')).click(); await driver.wait(until.elementLocated(By.css('.recharts-surface')), 5000);
   assert.equal((await driver.findElements(By.css('.heatmap .level-2'))).length, 1);
+  assert.equal((await driver.findElements(By.css('.heatmap [tabindex="0"]'))).length, 1);
+  await driver.findElement(By.css('.heatmap [tabindex="0"]')).click();
+  await driver.actions().sendKeys('').perform(); // ArrowLeft moves one week back
+  assert.equal(await driver.executeScript('return [...document.querySelectorAll(".heatmap .heat")].indexOf(document.activeElement)'), 90 - 7);
+  checked('달력 한 개의 탭 정지점과 화살표 키 이동');
   await writeFile(path.join(temporary, 'stats-light.png'), await driver.takeScreenshot(), 'base64');
   checked('실제 저장 데이터의 차트와 목표 달성 달력');
   const exported = (await command({ type: 'EXPORT' })).json;
