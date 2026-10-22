@@ -70,7 +70,7 @@ try {
   await (await driver.findElements(By.xpath('//button[normalize-space(.)="이 탭에서 감지"]')))[0].click();
   await driver.wait(until.elementLocated(By.css('.library-candidates')), 5000);
   assert.match(await driver.findElement(By.css('[role="dialog"]')).getText(), /100권을 찾았습니다/);
-  assert.match(await driver.findElement(By.css('[role="dialog"]')).getText(), /전체 서재 수집을 보장하지 않습니다/);
+  assert.match(await driver.findElement(By.css('[role="dialog"]')).getText(), /서재의 모든 책을 가져온다는 보장은 없습니다/);
   assert.equal((await command({ type: 'GET_STATE' })).snapshot.state.books.length, 5);
   assert.ok(await driver.executeScript('const button=[...document.querySelectorAll("[role=dialog] button")].find(button=>button.textContent.startsWith("선택한"));return button.getBoundingClientRect().bottom<=innerHeight;'));
   await writeFile(path.join(temporary, 'library-import-preview.png'), await driver.takeScreenshot(), 'base64');

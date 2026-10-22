@@ -24,7 +24,7 @@ describe('language resolution and display', () => {
   });
   it('interpolates after translation and preserves user content verbatim', () => {
     const title = '한국어 title {1} <img src=x> $&';
-    expect(translate('‘{0}’을 서재에서 제거할까요? 독서 기록은 보존합니다.', [title], 'en'))
+    expect(translate('‘{0}’ 책을 서재에서 제거할까요? 독서 기록은 보존합니다.', [title], 'en'))
       .toBe(`Remove “${title}” from your library? Reading history will be kept.`);
     expect(translate('{0}권', [2000], 'en')).toBe('2,000 books');
     expect(translate('{0}권', [2000], 'ko')).toBe('2,000권');

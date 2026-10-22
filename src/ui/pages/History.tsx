@@ -18,7 +18,7 @@ export function History(props: SharedProps & {
     const removed = state.books.find(b => b.id === book && b.archivedAt);
     const purgeButton = removed && <div className="info-box"><p>{t("서재에서 제거한 책입니다. 독서 기록은 그대로 남아 있습니다.")}</p><ActionButton className="text-button danger" onClick={() => {
             const count = state.sessions.filter(s => s.bookId === removed.id).length;
-            if (confirm(t("‘{0}’과 연결된 독서 기록 {1}개를 영구 삭제할까요? 이 작업은 되돌릴 수 없습니다.", [removed.title, count])))
+            if (confirm(t("‘{0}’ 책과 독서 기록 {1}개를 영구 삭제할까요? 이 작업은 되돌릴 수 없습니다.", [removed.title, count])))
                 return run({ type: 'PURGE_BOOK', id: removed.id, confirmed: true }, t("책과 연결된 기록을 영구 삭제했습니다.")).then(ok => { if (ok)
                     setBook(''); });
         }}>{t("이 책과 독서 기록 영구 삭제")}</ActionButton></div>;

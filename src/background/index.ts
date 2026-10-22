@@ -174,7 +174,7 @@ async function refreshActiveReader() {
 }
 async function start(id: string, confirm: boolean, restore = false, observedTab?: Tabs.Tab) {
   const state = await repository.read();
-  if (state.active) throw new Error('진행 중인 독서를 먼저 종료하세요. 타이머 두 개를 동시에 실행할 수 없습니다.');
+  if (state.active) throw new Error('진행 중인 독서를 먼저 종료하세요. 타이머는 한 번에 하나만 실행할 수 있습니다.');
   const book = state.books.find(b => b.id === id);
   if (!book?.url) throw new Error('책의 Play Books 리더 주소를 등록하세요. 다른 기기로 읽은 시간은 수동으로 기록할 수 있습니다.');
   if ((book.archivedAt || book.status === 'completed' || book.status === 'paused') && !restore) throw new Error('책을 다시 읽으려면 읽기 재개를 선택하세요.');
@@ -183,7 +183,7 @@ async function start(id: string, confirm: boolean, restore = false, observedTab?
   if (tab?.id === undefined || tab.windowId === undefined) throw new Error('독서 탭을 열지 못했습니다.');
   let evidence = await evidenceFor(tab.id);
   for (let attempt = 0; !evidence && attempt < 12; attempt++) { await new Promise(resolve => setTimeout(resolve, 250)); evidence = await evidenceFor(tab.id); }
-  if (!evidence || evidence.detection.key !== readerKey(book.url)) throw new Error('책을 열었습니다. 책을 모두 불러왔는지, Play Books 접근 권한이 있는지 확인한 뒤 다시 시작하세요. 이미 열려 있던 페이지는 새로고침이 필요할 수 있습니다.');
+  if (!evidence || evidence.detection.key !== readerKey(book.url)) throw new Error('책을 열었습니다. 책을 모두 불러왔는지, Play Books 접근 권한이 있는지 확인한 뒤 다시 시작하세요. 이미 열려 있던 페이지라면 새로고침해야 할 수 있습니다.');
   if (!evidence.detection.supported && !confirm) throw new Error('리더 구조를 확인하지 못했습니다. 화면에서 ‘이 탭에서 실제로 읽고 있습니다’를 선택한 뒤 다시 시작하세요.');
   const foreground = evidence.visible && await eligible(tab.id, tab.windowId);
   await repository.update(draft => {
@@ -344,7 +344,7 @@ async function handle(input: Command): Promise<Reply> {
     case 'SNOOZE': await repository.update(draft => {
       if (!draft.settings.reminderEnabled) throw new Error('설정에서 알림을 먼저 켜 주세요.');
       const snooze = snoozeAt(new Date(), draft.settings.snoozeMinutes);
-      if (!snooze) throw new Error('다시 알림은 오늘 자정 전까지만 예약합니다.');
+      if (!snooze) throw new Error('다시 알림은 오늘 자정 전까지만 예약할 수 있습니다.');
       draft.reminder.snooze = snooze; draft.reminder.skipped = draft.reminder.skipped.filter(d => d !== localDate());
       draft.reminder.days = [...new Set([...draft.reminder.days, localDate()])].slice(-900);
     }); await browser.notifications.clear('readchime.prompt'); break;
