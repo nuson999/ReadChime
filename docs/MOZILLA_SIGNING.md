@@ -1,5 +1,26 @@
 # Mozilla unlisted signing checkpoint
 
+## Version 0.2.3 prepared for manual upload (2026-10-22)
+
+Built from branch `feat/ui-perf-polish`. The user will upload this update
+directly; nothing has been uploaded by the agent. Use the existing unlisted
+add-on, not a new registration:
+
+`https://addons.mozilla.org/ko/developers/addon/e82fa53c1dda474d995b/versions/submit/`
+
+- Extension: `artifacts/readchime-0.2.3.zip` (SHA-256 `C7973F1F…C0FCEFE7`).
+- Matching source: `artifacts/readchime-0.2.3-source.zip` (67 allowlisted files, SHA-256 `CFCFB743…543EFFDB`).
+- Release notes: `docs/RELEASE_NOTES_0.2.3.md`.
+- Rebuild evidence: `artifacts/readchime-0.2.3-reproducibility.json`.
+
+The source archive was extracted into a new folder and built with a fresh
+`npm ci` and `npm run build` (Node.js 24.20.0, npm 11.19.0); all 16 packaged
+files match by SHA-256. The source ZIP holds committed file contents only.
+Extension ID and permissions are unchanged. `npm run check` passed (81 tests,
+zero web-ext lint errors, the same two bundled React DOM warnings), and all four
+Firefox smoke tests passed on Firefox 158.0.1 before the version-only bump.
+If 0.2.2 was never uploaded, 0.2.3 still applies cleanly as the next version.
+
 ## Version 0.2.2 prepared for manual upload (2026-10-22)
 
 The user will upload this update directly. No version 0.2.2 package or source
