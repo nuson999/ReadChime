@@ -1,7 +1,7 @@
-# ReadChime 0.2.2: source and reproducible build
+# ReadChime 0.2.3: source and reproducible build
 
 This archive accompanies the unlisted (self-distributed) Firefox extension
-`readchime@local.invalid`, version 0.2.2. The author intends personal use.
+`readchime@local.invalid`, version 0.2.3. The author intends personal use.
 
 ## Build environment
 
@@ -18,15 +18,17 @@ npm run build
 ```
 
 The complete extension is generated in `dist/`. Compare all files in that folder
-with the uploaded `readchime-0.2.2.zip` (ZIP timestamps and compression are irrelevant).
+with the uploaded `readchime-0.2.3.zip` (ZIP timestamps and compression are irrelevant).
 The lockfile pins dependencies, including public React, Recharts, Zod, Vite,
 esbuild, and Tailwind packages. All build tools run locally and are open source.
 Tailwind source detection is explicitly limited to `src/ui/`, so unrelated files,
 Git metadata, and the directory where the archive is extracted do not affect CSS.
 
-`vite.config.ts` builds `popup.html` and `dashboard.html`. Then `scripts/build.mjs`
+`vite.config.ts` builds `popup.html` (entry `src/ui/popup.tsx`) and `dashboard.html`
+(entry `src/ui/dashboard.tsx`); the statistics chart is a lazily loaded chunk. Then `scripts/build.mjs`
 bundles the background and content scripts and generates third-party notices.
-`scripts/check-build.mjs` verifies manifest metadata and packaged resource paths.
+`scripts/check-build.mjs` verifies manifest metadata, packaged resource paths, and
+the up-front JavaScript size budget of each page.
 Minification is build output; the readable original TypeScript/React source is in
 `src/`. Runtime dependencies are bundled; there is no remote executable code.
 

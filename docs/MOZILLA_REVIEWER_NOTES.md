@@ -1,4 +1,4 @@
-# ReadChime 0.2.2: notes for Mozilla reviewers
+# ReadChime 0.2.3: notes for Mozilla reviewers
 
 Requested channel: **unlisted / self-distributed**. The developer intends personal
 use and does not request a public AMO listing. This is a Firefox desktop extension.
@@ -41,13 +41,16 @@ We do not provide or embed user credentials. Automated browser smoke tests use
 synthetic outer reader/library metadata rather than authenticated private books.
 
 Validation before packaging: 81 unit/integration tests, strict TypeScript,
-ESLint, build/resource checks, and Firefox extension lint. Firefox 158.0.1 smoke
+ESLint, build/resource/size-budget checks, and Firefox extension lint. Firefox 158.0.1 smoke
 tests cover reader prompts, the five-second grace period, collapsible resume UI,
-trusted resume clicks, and continued counting in a visible unfocused window.
+trusted resume clicks, and continued counting in a visible unfocused window,
+plus keyboard navigation of the statistics calendar.
 Current authenticated Google reader layouts and actual cross-application window
 occlusion have not been verified. Version 0.2.1 permanent signed installation and
-restart persistence were verified in an isolated profile; the new 0.2.2 signed
-package does not exist yet. Permissions are unchanged from 0.2.1.
+restart persistence were verified in an isolated profile; a signed 0.2.3
+package does not exist yet. Permissions and the content script are unchanged
+from 0.2.2 except that the in-page prompt now follows the user's light/dark
+theme setting and draws its play icon as an inline SVG built with DOM APIs.
 
 `web-ext lint` reports two `UNSAFE_VAR_ASSIGNMENT` warnings inside the bundled
 React DOM dependency. Application code does not use `dangerouslySetInnerHTML`,
