@@ -1,4 +1,5 @@
 import React, { Component, useCallback, useEffect, useState, type ReactNode } from 'react';
+import { Icon } from './components/Icon';
 import { createRoot } from 'react-dom/client';
 import { LocaleProvider, useI18n } from './i18n';
 import type { Snapshot } from '../shared/messages';
@@ -88,8 +89,8 @@ export function useAppState({ popup = false } = {}) {
             setBusy(false);
         }
     };
-    const loading = !snapshot && <LocaleProvider language="system"><main className="loading" role={error ? 'alert' : 'status'}><div className="brand-mark">▤</div><h1>ReadChime</h1><p>{i18n.errorText(error) || t("독서 기록을 불러오는 중…")}</p>{error && <button onClick={() => void refresh()}>{t("다시 시도")}</button>}</main></LocaleProvider>;
-    const messages = snapshot && <>{!extensionAvailable() && <div className="info-box preview-notice">{t("개발 화면 미리보기 · 실제 데이터를 읽고 저장하려면 Firefox 확장 설치가 필요합니다.")}</div>}{(error || snapshot.state.reminder.lastError) && <div role="alert" className="error-box dismissible"><span>{i18n.errorText(error || snapshot.state.reminder.lastError)}</span><button aria-label={t("오류 안내 닫기")} onClick={() => setError('')}>×</button></div>}<div role="status" aria-live="polite" className="toast-region">{notice && <div className="toast">✓ {i18n.errorText(notice)}</div>}</div></>;
+    const loading = !snapshot && <LocaleProvider language="system"><main className="loading" role={error ? 'alert' : 'status'}><div className="brand-mark"><Icon name="book" size={22}/></div><h1>ReadChime</h1><p>{i18n.errorText(error) || t("독서 기록을 불러오는 중…")}</p>{error && <button onClick={() => void refresh()}>{t("다시 시도")}</button>}</main></LocaleProvider>;
+    const messages = snapshot && <>{!extensionAvailable() && <div className="info-box preview-notice">{t("개발 화면 미리보기 · 실제 데이터를 읽고 저장하려면 Firefox 확장 설치가 필요합니다.")}</div>}{(error || snapshot.state.reminder.lastError) && <div role="alert" className="error-box dismissible"><span>{i18n.errorText(error || snapshot.state.reminder.lastError)}</span><button aria-label={t("오류 안내 닫기")} onClick={() => setError('')}><Icon name="close"/></button></div>}<div role="status" aria-live="polite" className="toast-region">{notice && <div className="toast"><Icon name="check" size={16}/>{i18n.errorText(notice)}</div>}</div></>;
     return { snapshot, run, busy, loading, messages, ...i18n };
 }
 export function ErrorFallback() {

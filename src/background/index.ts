@@ -261,7 +261,7 @@ async function heartbeat(message: Heartbeat, sender: Runtime.MessageSender, prom
   const showPrompt = !!(prompt && !started && foreground && state.settings.readerPrompt && await readerPrompts.offer(tab.id, message.detection.key, tab.windowId));
   return { ok: true, reader: { key: message.detection.key, title: book.title, author: book.author, pendingTitle: !!book.pendingTitle,
     restore: !!book.archivedAt || book.status === 'completed' || book.status === 'paused', supported: message.detection.supported,
-    started, showPrompt, language: state.settings.language,
+    started, showPrompt, language: state.settings.language, theme: state.settings.theme,
     sessionId: started ? state.active?.id : undefined, paused: started && state.active?.status === 'paused' } };
 }
 async function handle(input: Command): Promise<Reply> {

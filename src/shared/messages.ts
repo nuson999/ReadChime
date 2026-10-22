@@ -33,7 +33,7 @@ export const heartbeatSchema = z.object({
   visible: z.boolean(), mono: z.number().finite(), token: z.string().max(100), timezone: z.string().max(100),
 });
 export const readerActionSchema = z.object({ type: z.enum(['READER_START', 'READER_DISMISS', 'READER_RESUME']), key: z.string().min(1).max(256), confirm: z.boolean().default(false), sessionId: z.uuid().optional() });
-export interface ReaderOffer { key: string; title: string; author: string; pendingTitle: boolean; restore: boolean; supported: boolean; started: boolean; showPrompt: boolean; language: Language; sessionId?: string; paused?: boolean }
+export interface ReaderOffer { key: string; title: string; author: string; pendingTitle: boolean; restore: boolean; supported: boolean; started: boolean; showPrompt: boolean; language: Language; theme?: 'system' | 'light' | 'dark'; sessionId?: string; paused?: boolean }
 export type ReaderReply = { ok: true; reader?: ReaderOffer } | { ok: false; error?: string };
 export interface Snapshot { state: State; nextAlarm: number | null; detection?: Detection; error?: string }
 export interface ImportPreview { addedBooks: number; addedSessions: number; identical: number; conflicts: { kind: 'book' | 'session'; id: string; label: string }[] }

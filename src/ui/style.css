@@ -66,3 +66,16 @@ button[aria-busy="true"]::after { content:""; display:inline-block; width:.9em; 
 .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; }
 .heat.selected { outline:2px solid var(--accent); outline-offset:1px; }
 .heat-caption { text-align:center; color:var(--muted); font-size:12px; min-height:1.8em; margin:-6px 0 10px; }
+/* Inline SVG icons */
+.icon { display:inline-block; flex-shrink:0; vertical-align:-.15em; }
+button .icon { margin-right:6px; vertical-align:-.2em; }
+.icon-button .icon,.dismissible button .icon { margin:0; }
+.sidebar nav a .icon { width:20px; height:20px; }
+.brand-mark .icon { display:block; }
+.empty-symbol .icon { margin:0 auto; }
+.toast { display:flex; align-items:center; gap:8px; }
+.local-badge,.local-note { display:flex; align-items:center; gap:6px; }
+.pill.live::before { content:""; display:inline-block; width:7px; height:7px; margin-right:6px; border-radius:50%; background:currentColor; vertical-align:.05em; animation:rc-pulse 1.6s ease-in-out infinite; }
+@keyframes rc-pulse { 50% { opacity:.35; } }
+@media (prefers-reduced-motion:reduce) { .pill.live::before { animation:none; } }
+.local-note { justify-content:center; }
