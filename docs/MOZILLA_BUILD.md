@@ -5,7 +5,7 @@ This archive accompanies the unlisted (self-distributed) Firefox extension
 
 ## Build environment
 
-The submitted package was built on Windows with Node.js 24.20.0 and npm 11.19.0.
+The submitted package was built on Windows with Node.js 24.22.1 and npm 11.19.1.
 Use those versions when reproducing the package. Node.js 22.19 or newer is required.
 No credentials, API keys, environment files, Google login, or private services are
 needed to build. Internet access is needed only to install public npm dependencies.
