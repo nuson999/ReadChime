@@ -1,5 +1,29 @@
 # Mozilla release checkpoint
 
+## Version 0.2.7 prepared for manual upload (2026-10-26)
+
+Bug-fix update for the public listing (same channel as 0.2.6, add-on ID
+`readchime@local.invalid`). The reading timer no longer ends a session while the
+reader stays visible on an unfocused display: heartbeats carry the page's own
+timestamp, and late/missing heartbeats, clock jumps, or timezone changes only drop
+the unconfirmed interval instead of finalizing. The user uploads it to AMO.
+
+- Extension ZIP: `artifacts/readchime-0.2.7.zip`, SHA-256
+  `7CDF0C5385FCBBCAAA7AAE4A4682AA94E9C6BC09DFEC3F8E0839F6A30867246F`.
+- Source ZIP: `artifacts/readchime-0.2.7-source.zip`, 70 allowlisted files,
+  SHA-256 `7570BD59E182FBCBCC959D84AD724F51EF23E57368E12AC72BB4C5BA2727E6FC`.
+- Rebuild evidence: `artifacts/readchime-0.2.7-reproducibility.json`.
+- Release notes: `docs/RELEASE_NOTES_0.2.7.md`.
+
+`npm run check` passed: 90 tests, TypeScript, ESLint, build/resource/size checks,
+and zero local Firefox lint errors (two existing bundled React DOM warnings). All
+four Firefox smoke tests passed on the final code. A fresh `npm ci` and
+`npm run build` from the source ZIP (Node.js 24.22.1, npm 11.19.1) reproduced all
+16 packaged files exactly by SHA-256. Permissions are unchanged from 0.2.6. The
+real cross-display scenario with an authenticated Google reader has not been
+verified by the agent; the internal stop reason is logged to the extension console
+for diagnosis. Mozilla's upload validator has not been run yet.
+
 ## Version 0.2.6 submitted for public listing (2026-10-23)
 
 The user authorized public release and selected the MIT license. The existing

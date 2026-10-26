@@ -1,8 +1,8 @@
-# ReadChime 0.2.6: notes for Mozilla reviewers
+# ReadChime 0.2.7: notes for Mozilla reviewers
 
-Requested channel: **listed / public on addons.mozilla.org**. This is the first
-public release of the existing add-on `readchime@local.invalid`, following
-self-distributed version 0.2.5. This is a Firefox desktop extension.
+Requested channel: **listed / public on addons.mozilla.org**. This is a bug-fix
+update to the listed add-on `readchime@local.invalid` (0.2.6 was the first public
+release). This is a Firefox desktop extension.
 
 ReadChime stores a personal reading library, reading-time estimates, and reminder
 settings locally. There is no developer account service, analytics, telemetry,
@@ -41,7 +41,7 @@ source. Real Google reading requires the user's own account and access to a book
 We do not provide or embed user credentials. Automated browser smoke tests use
 synthetic outer reader/library metadata rather than authenticated private books.
 
-Validation before packaging: 82 unit/integration tests, strict TypeScript,
+Validation before packaging: 89 unit/integration tests, strict TypeScript,
 ESLint, build/resource/size-budget checks, and Firefox extension lint. Firefox 158.0.1 smoke
 tests cover reader prompts, the five-second grace period, collapsible resume UI,
 trusted resume clicks, and continued counting in a visible unfocused window,
@@ -57,6 +57,16 @@ extension ID, the content script, and data handling are unchanged from 0.2.4.
 Version 0.2.6 changes only the version metadata and public-release documentation;
 runtime behavior is unchanged from 0.2.5. English and Korean listing text and a
 privacy statement accompany the public release.
+Version 0.2.7 fixes the reading timer ending a session while the reader stayed
+visible (reported on a second display while another application had focus). The
+content script now sends its own `Date.now()` with each heartbeat next to
+`performance.now()`, so background queueing delay is no longer read as a clock
+jump; stamps outside the background clock's window are ignored. A late or missing
+heartbeat, a clock jump, or a timezone change now excludes only the unconfirmed
+interval and continues on the next visible heartbeat instead of finalizing the
+session. An internal stop reason is kept with the active session and logged to the
+extension console for diagnostics. Permissions, extension ID, and data handling
+are unchanged from 0.2.6.
 
 `web-ext lint` reports two `UNSAFE_VAR_ASSIGNMENT` warnings inside the bundled
 React DOM dependency. Application code does not use `dangerouslySetInnerHTML`,
