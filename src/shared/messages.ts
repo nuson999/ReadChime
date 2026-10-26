@@ -27,10 +27,10 @@ export const commandSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('DASHBOARD'), section: z.enum(['home', 'stats', 'library', 'history', 'settings']).optional() }),
 ]);
 export type Command = z.input<typeof commandSchema>;
-export interface Heartbeat { type: 'HEARTBEAT'; detection: Detection; visible: boolean; mono: number; token: string; timezone: string }
+export interface Heartbeat { type: 'HEARTBEAT'; detection: Detection; visible: boolean; at?: number; mono: number; token: string; timezone: string }
 export const heartbeatSchema = z.object({
   type: z.literal('HEARTBEAT'), detection: z.object({ key: z.string().max(256).nullable(), supported: z.boolean(), reason: z.string().max(1000), title: z.string().trim().min(1).max(300).optional(), author: z.string().max(200).optional() }),
-  visible: z.boolean(), mono: z.number().finite(), token: z.string().max(100), timezone: z.string().max(100),
+  visible: z.boolean(), at: z.number().finite().optional(), mono: z.number().finite(), token: z.string().max(100), timezone: z.string().max(100),
 });
 export const readerActionSchema = z.object({ type: z.enum(['READER_START', 'READER_DISMISS', 'READER_RESUME']), key: z.string().min(1).max(256), confirm: z.boolean().default(false), sessionId: z.uuid().optional() });
 export interface ReaderOffer { key: string; title: string; author: string; pendingTitle: boolean; restore: boolean; supported: boolean; started: boolean; showPrompt: boolean; language: Language; theme?: 'system' | 'light' | 'dark'; sessionId?: string; paused?: boolean }

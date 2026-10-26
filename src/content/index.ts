@@ -8,7 +8,8 @@ import { readerKey } from '../domain/books';
 const token = crypto.randomUUID();
 function evidence(): Heartbeat {
   return { type: 'HEARTBEAT', detection: playBooksDetector.detect(location.href, document), visible: document.visibilityState === 'visible',
-    mono: performance.now(), token, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone };
+    // Wall and monotonic clocks are read together so queueing delay cannot look like drift.
+    at: Date.now(), mono: performance.now(), token, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone };
 }
 let detectionSignature = '';
 function send() {

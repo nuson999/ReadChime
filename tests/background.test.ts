@@ -196,9 +196,33 @@ describe('실제 백그라운드 배선과 저장소 통합', () => {
     await send({ type: 'START', id: book.id }); vi.setSystemTime(Date.now() + 5000); await beat(); startup(); const next = await state();
     expect(next.active).toBeNull(); expect(next.sessions[0].durationSeconds).toBe(5); expect(next.sessions[0].interrupted).toBe(true); expect(next.trackingBlocked).toBe(true);
   });
-  it('길게 끊긴 관측은 절전 구간을 더하지 않는다', async () => {
+  it('길게 끊긴 관측은 절전 구간을 더하지 않고 세션을 이어 간다', async () => {
     await send({ type: 'START', id: book.id }); vi.setSystemTime(Date.now() + 5000); await beat(); vi.setSystemTime(Date.now() + 600000); await beat();
-    const next = await state(); expect(next.active).toBeNull(); expect(next.sessions[0].durationSeconds).toBe(5);
+    vi.setSystemTime(Date.now() + 5000); await beat();
+    const next = await state(); expect(next.active?.status).toBe('running'); expect(next.active?.lastStopReason?.reason).toBe('gap');
+    expect(next.active?.buckets.reduce((sum, b) => sum + b.seconds, 0)).toBe(10); expect(next.sessions).toHaveLength(0);
+  });
+  it('처리 대기로 늦게 도착한 관측을 시계 어긋남으로 보지 않는다', async () => {
+    await send({ type: 'START', id: book.id }); const base = Date.now(); await beat({ at: base, mono: base });
+    vi.setSystemTime(base + 8000); await beat({ at: base + 5000, mono: base + 5000 });
+    const next = await state(); expect(next.active?.status).toBe('running'); expect(next.active?.lastStopReason).toBeUndefined();
+    expect(next.active?.buckets[0].seconds).toBe(5);
+  });
+  it('범위를 벗어난 페이지 시각은 세지 않고 대기로 둔다', async () => {
+    await send({ type: 'START', id: book.id }); await beat(); await beat({ at: Date.now() + 10000 });
+    let next = await state(); expect(next.active?.status).toBe('waiting'); expect(next.active?.lastStopReason?.reason).toBe('bad-timestamp');
+    vi.setSystemTime(Date.now() + 5000); await beat(); vi.setSystemTime(Date.now() + 5000); await beat();
+    next = await state(); expect(next.active?.status).toBe('running'); expect(next.active?.buckets[0].seconds).toBe(5);
+  });
+  it('관측이 끊긴 세션은 주기 점검에서 끝나지 않고 대기로 바뀐다', async () => {
+    await send({ type: 'START', id: book.id }); await beat(); vi.setSystemTime(Date.now() + 5000); await beat(); vi.setSystemTime(Date.now() + 20000);
+    let next = await state(); expect(next.active?.status).toBe('waiting'); expect(next.active?.lastStopReason?.reason).toBe('stale-alarm');
+    await beat(); vi.setSystemTime(Date.now() + 5000); await beat();
+    next = await state(); expect(next.active?.status).toBe('running'); expect(next.active?.buckets[0].seconds).toBe(10); expect(next.sessions).toHaveLength(0);
+  });
+  it('직접 일시정지한 사유를 기록한다', async () => {
+    await send({ type: 'START', id: book.id }); await send({ type: 'PAUSE' });
+    expect((await state()).active?.lastStopReason?.reason).toBe('user-paused');
   });
   it('서재 삭제가 과거 기록과 제목을 없애지 않는다', async () => {
     await send({ type: 'START', id: book.id }); vi.setSystemTime(Date.now() + 5000); await beat(); await send({ type: 'STOP' }); await send({ type: 'DELETE_BOOK', id: book.id });

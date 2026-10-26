@@ -96,8 +96,24 @@ describe('타이머의 보수적인 상태 전이', () => {
   });
   it('절전·시계 역행·증거 지연 구간을 더하지 않는다', () => {
     const base = Date.parse(now);
-    for (const delta of [60000, -5000]) { const timer = active(); observe(timer, evidence(base)); expect(observe(timer, evidence(base + delta))).toBe('interrupted'); expect(timer.buckets).toHaveLength(0); }
-    const timer = active(); observe(timer, evidence(base)); expect(observe(timer, { ...evidence(base + 5000), mono: base + 100 })).toBe('interrupted');
+    for (const delta of [60000, -5000]) { const timer = active(); observe(timer, evidence(base)); expect(observe(timer, evidence(base + delta))).toBe('gap'); expect(timer.buckets).toHaveLength(0); }
+    const timer = active(); observe(timer, evidence(base)); expect(observe(timer, { ...evidence(base + 5000), mono: base + 100 })).toBe('drift'); expect(timer.buckets).toHaveLength(0);
+  });
+  it('끊긴 관측은 세션을 끝내지 않고 다음 관측부터 다시 센다', () => {
+    const timer = active(); const base = Date.parse(now);
+    observe(timer, evidence(base)); observe(timer, evidence(base + 5000)); observe(timer, evidence(base + 65000)); observe(timer, evidence(base + 70000));
+    expect(timer.status).toBe('running'); expect(timer.lastStopReason).toEqual({ reason: 'gap', at: base + 65000 });
+    expect(finish(timer, now, false)[0].durationSeconds).toBe(10);
+  });
+  it('시간대 변경도 세션을 끝내지 않는다', () => {
+    const timer = active(); const base = Date.parse(now);
+    observe(timer, evidence(base)); expect(observe(timer, evidence(base + 5000, true, 'tab', 'Asia/Tokyo'))).toBe('timezone'); observe(timer, evidence(base + 10000, true, 'tab', 'Asia/Tokyo'));
+    expect(timer.status).toBe('running'); expect(finish(timer, now, false).map(s => s.durationSeconds)).toEqual([5]);
+  });
+  it('숨김과 유예 만료 사유를 기록한다', () => {
+    const timer = active(); const base = Date.parse(now);
+    observe(timer, evidence(base)); observe(timer, evidence(base + 1000, false)); expect(timer.lastStopReason?.reason).toBe('hidden');
+    observe(timer, evidence(base + 7000, false)); expect(timer.status).toBe('paused'); expect(timer.lastStopReason?.reason).toBe('grace-expired');
   });
   it('다른 문서의 관측을 이어 붙이지 않는다', () => {
     const timer = active(); const base = Date.parse(now); observe(timer, evidence(base)); observe(timer, evidence(base + 5000, true, 'new-document')); expect(timer.buckets).toHaveLength(0);

@@ -42,6 +42,8 @@ export const activeSchema = z.object({
   buckets: z.array(bucketSchema),
   awaySince: z.number().finite().optional(),
   evidence: z.object({ at: z.number(), mono: z.number(), token: z.string(), eligible: z.boolean(), timezone: z.string() }).nullable(),
+  // Internal diagnostics: why counting last stopped. Not shown in the UI.
+  lastStopReason: z.object({ reason: z.enum(['hidden', 'navigated', 'grace-expired', 'user-paused', 'gap', 'drift', 'timezone', 'bad-timestamp', 'stale-alarm', 'background-restart']), at: z.number() }).optional(),
 });
 export const reminderSchema = z.object({
   days: z.array(dateKeySchema).max(1000).default([]), skipped: z.array(dateKeySchema).max(1000).default([]),

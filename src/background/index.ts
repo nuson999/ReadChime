@@ -6,7 +6,7 @@ import { PLAY_BOOKS, readerKey, canonicalBookUrl, recommend, detectedBook } from
 import { localDate } from '../domain/time';
 import { goalFor, summary } from '../domain/statistics';
 import { DAILY_ALARM, SNOOZE_ALARM, RECONCILE_ALARM, nextAlarm, scheduledToday, shouldPrompt, snoozeAt } from '../domain/scheduler';
-import { expireAway, finish, leave, MAX_EVIDENCE_GAP_MS, observe, READING_GRACE_MS, resume, suspend } from '../domain/timer';
+import { expireAway, finish, leave, MAX_CLOCK_DRIFT_MS, MAX_EVIDENCE_GAP_MS, observe, READING_GRACE_MS, resume, stopped, suspend, type StopReason } from '../domain/timer';
 import { commandSchema, heartbeatSchema, readerActionSchema, type Command, type Reply, type Heartbeat, type Snapshot, type ReaderReply } from '../shared/messages';
 import type { Detection } from '../domain/detector';
 import { LibraryImporter } from './library';
@@ -15,7 +15,7 @@ import { ReaderPrompts } from './reader-prompts';
 
 const repository = new LocalRepository({
   async get() { return (await browser.storage.local.get(STORAGE_KEY))[STORAGE_KEY]; },
-  async set(state) { await browser.storage.local.set({ [STORAGE_KEY]: state }); void badge(state); },
+  async set(state) { await browser.storage.local.set({ [STORAGE_KEY]: state }); void badge(state); logStop(state); },
 });
 const libraryImporter = new LibraryImporter(repository);
 const readerPrompts = new ReaderPrompts();
@@ -27,8 +27,16 @@ let graceDeadline: number | undefined;
 function serial<T>(operation: () => Promise<T>): Promise<T> {
   const next = tail.then(operation); tail = next.catch(() => undefined); return next;
 }
-function finalize(state: State, interrupted: boolean) {
+// Every recorded stop reason reaches the console once, for diagnosing stopped timers.
+let loggedStop: string | undefined;
+function logStop(state: State) {
+  const stop = state.active?.lastStopReason; const key = stop ? `${state.active!.id}|${stop.reason}|${stop.at}` : undefined;
+  if (stop && key !== loggedStop) console.info('ReadChime: timer stopped counting:', stop.reason, new Date(stop.at).toISOString());
+  loggedStop = key;
+}
+function finalize(state: State, interrupted: boolean, reason = interrupted ? 'interrupted' : 'stopped') {
   if (!state.active) return;
+  console.info('ReadChime: session ended:', reason);
   state.trackingBlocked = true;
   const sessions = finish(state.active, new Date().toISOString(), interrupted);
   state.sessions.push(...sessions);
@@ -65,8 +73,8 @@ const ready = repository.read().then(async state => {
   await badge(state);
   if (state.active) await repository.update(draft => {
     const old = draft.active!;
-    if (old.status === 'running' && (!old.evidence || Date.now() - old.evidence.at > MAX_EVIDENCE_GAP_MS)) finalize(draft, true);
-    else suspend(old);
+    if (old.status !== 'paused') stopped(old, old.status === 'running' && (!old.evidence || Date.now() - old.evidence.at > MAX_EVIDENCE_GAP_MS) ? 'stale-alarm' : 'background-restart', Date.now());
+    suspend(old);
   });
 });
 
@@ -158,7 +166,10 @@ async function checkPrompt() {
 async function staleSession() {
   await syncGrace();
   const state = await repository.read();
-  if (state.active?.status === 'running' && (!state.active.evidence || Date.now() - state.active.evidence.at > MAX_EVIDENCE_GAP_MS)) await repository.update(draft => finalize(draft, true));
+  if (state.active?.status === 'running' && (!state.active.evidence || Date.now() - state.active.evidence.at > MAX_EVIDENCE_GAP_MS)) await repository.update(draft => {
+    // Missing heartbeats only stop counting; the next eligible heartbeat continues the session.
+    if (draft.active?.status === 'running') { suspend(draft.active); stopped(draft.active, 'stale-alarm', Date.now()); }
+  });
 }
 // Persist the deadline for event-page suspension; a short timer keeps the page UI
 // timely while the alarm and all incoming observations also enforce the deadline.
@@ -179,8 +190,8 @@ async function syncGrace() {
     event(async () => { await syncGrace(); await refreshActiveReader(); });
   }, Math.max(0, deadline - Date.now()));
 }
-async function markAway() {
-  await repository.update(draft => { if (draft.active) leave(draft.active, Date.now()); });
+async function markAway(reason: StopReason = 'hidden') {
+  await repository.update(draft => { if (draft.active) leave(draft.active, Date.now(), reason); });
   await syncGrace();
 }
 async function refreshActiveReader() {
@@ -189,7 +200,7 @@ async function refreshActiveReader() {
   let tab: Tabs.Tab;
   try { tab = await browser.tabs.get(active.tabId); } catch { return; }
   const key = readerKey(state.books.find(book => book.id === active.bookId)?.url ?? '');
-  if (!key || readerKey(tab.url ?? '') !== key || tab.status === 'loading') { await markAway(); return; }
+  if (!key || readerKey(tab.url ?? '') !== key || tab.status === 'loading') { await markAway('navigated'); return; }
   const evidence = await evidenceFor(active.tabId);
   if (!evidence || evidence.detection.key !== key) { await markAway(); return; }
   const reply = await heartbeat(evidence, { tab, url: tab.url });
@@ -217,7 +228,7 @@ async function start(id: string, confirm: boolean, restore = false, observedTab?
     draft.settings.currentBookId = id;
     draft.active = { id: crypto.randomUUID(), bookId: book.id, bookTitle: book.title, startedAt: new Date().toISOString(), tabId: tab.id!, windowId: tab.windowId!,
       status: foreground ? 'running' : 'waiting', manualConfirmed: confirm, automaticStart: false, buckets: [],
-      evidence: { at: Date.now(), mono: evidence!.mono, token: evidence!.token, timezone: evidence!.timezone, eligible: foreground } };
+      evidence: { at: observedAt(evidence!) ?? Date.now(), mono: evidence!.mono, token: evidence!.token, timezone: evidence!.timezone, eligible: foreground } };
   });
   await readerPrompts.dismiss(tab.id, readerKey(book.url)!);
 }
@@ -229,7 +240,7 @@ async function heartbeat(message: Heartbeat, sender: Runtime.MessageSender, prom
     if (prompt && message.detection.key === null && sender.tab?.id === (await repository.read()).active?.tabId) {
       try {
         const source = new URL(sender.url ?? ''); const current = await browser.tabs.get(sender.tab!.id!);
-        if (source.origin === new URL(PLAY_BOOKS).origin && source.pathname.startsWith('/books') && !readerKey(current.url ?? '')) await markAway();
+        if (source.origin === new URL(PLAY_BOOKS).origin && source.pathname.startsWith('/books') && !readerKey(current.url ?? '')) await markAway('navigated');
       } catch { /* Invalid or removed sender. */ }
     }
     return { ok: true };
@@ -261,21 +272,22 @@ async function heartbeat(message: Heartbeat, sender: Runtime.MessageSender, prom
         }
         if (current.pendingAuthor && message.detection.author) { current.author = message.detection.author; current.pendingAuthor = false; current.updatedAt = now; }
       }
-      if (draft.active && draft.active.bookId !== current.id) finalize(draft, false);
+      if (draft.active && draft.active.bookId !== current.id) finalize(draft, false, 'book-switched');
       draft.settings.currentBookId = current.id;
     });
     book = detectedBook(state, message.detection.key);
   }
   if (prompt && state.active && book?.id === state.active.bookId && (state.active.tabId === tab.id || foreground)) {
+    const at = observedAt(message);
     state = await repository.update(draft => {
       if (!draft.active) return;
+      if (at === undefined) { suspend(draft.active); stopped(draft.active, 'bad-timestamp', Date.now()); return; }
       if (draft.active.tabId !== tab.id && foreground) { leave(draft.active, Date.now()); draft.active.manualConfirmed = false; draft.active.tabId = tab.id!; draft.active.windowId = tab.windowId!; }
-      const result = observe(draft.active, { at: Date.now(), mono: message.mono, token: message.token, timezone: message.timezone,
+      observe(draft.active, { at, mono: message.mono, token: message.token, timezone: message.timezone,
         eligible: visible && (message.detection.supported || draft.active.manualConfirmed) });
-      if (result === 'interrupted') finalize(draft, true);
     });
   } else if (prompt && state.active?.tabId === tab.id) {
-    await markAway();
+    await markAway('navigated');
   }
   await syncGrace();
   state = await repository.read();
@@ -286,6 +298,11 @@ async function heartbeat(message: Heartbeat, sender: Runtime.MessageSender, prom
     restore: !!book.archivedAt || book.status === 'completed' || book.status === 'paused', supported: message.detection.supported,
     started, showPrompt, language: state.settings.language, theme: state.settings.theme,
     sessionId: started ? state.active?.id : undefined, paused: started && state.active?.status === 'paused' } };
+}
+// The page stamps each heartbeat; reject stamps outside the background clock's window.
+function observedAt(message: Heartbeat): number | undefined {
+  const now = Date.now(); const at = message.at ?? now;
+  return at > now + MAX_CLOCK_DRIFT_MS || at < now - MAX_EVIDENCE_GAP_MS ? undefined : at;
 }
 async function handle(input: Command): Promise<Reply> {
   await ready;
@@ -345,7 +362,7 @@ async function handle(input: Command): Promise<Reply> {
     }); break;
     case 'OPEN_BOOK': { const state = await repository.read(); await openBook(command.id ? state.books.find(b => b.id === command.id && !b.archivedAt) : recommend(state)); break; }
     case 'START': await start(command.id, command.confirm, command.restore); break;
-    case 'PAUSE': await repository.update(draft => { if (draft.active) suspend(draft.active, true); }); break;
+    case 'PAUSE': await repository.update(draft => { if (draft.active) { suspend(draft.active, true); stopped(draft.active, 'user-paused', Date.now()); } }); break;
     case 'RESUME': await repository.update(draft => { if (draft.active) resume(draft.active); }); break;
     case 'STOP': await repository.update(draft => finalize(draft, false)); break;
     case 'SAVE_SESSION': await repository.update(draft => {
@@ -445,11 +462,11 @@ browser.alarms.onAlarm.addListener(alarm => event(async () => {
 }));
 browser.runtime.onStartup.addListener(() => event(async () => {
   await readerPrompts.reset();
-  await repository.update(draft => finalize(draft, true)); await checkPrompt(); await reconcile();
+  await repository.update(draft => finalize(draft, true, 'browser-startup')); await checkPrompt(); await reconcile();
 }));
 browser.runtime.onInstalled.addListener(() => event(async () => {
   await readerPrompts.reset();
-  await repository.update(draft => finalize(draft, true)); await checkPrompt(); await reconcile();
+  await repository.update(draft => finalize(draft, true, 'extension-installed')); await checkPrompt(); await reconcile();
 }));
 browser.notifications.onClicked.addListener(id => { if (id === 'readchime.prompt') event(async () => { await openBook(recommend(await repository.read())); await browser.notifications.clear(id); }); });
 async function observeForeground() {
@@ -467,10 +484,10 @@ browser.tabs.onUpdated.addListener((id, change) => { if (change.url || change.st
   if (state.active?.tabId === id) {
     const key = readerKey(state.books.find(book => book.id === state.active?.bookId)?.url ?? '');
     if (change.status === 'loading' || readerKey(change.url ?? '') !== key) {
-      await repository.update(draft => { if (draft.active) { draft.active.manualConfirmed = false; leave(draft.active, Date.now()); } });
+      await repository.update(draft => { if (draft.active) { draft.active.manualConfirmed = false; leave(draft.active, Date.now(), 'navigated'); } });
       await syncGrace();
     }
   }
 }); });
-browser.tabs.onRemoved.addListener(id => event(async () => { detections.delete(id); await readerPrompts.remove(id); if ((await repository.read()).active?.tabId === id) await repository.update(draft => finalize(draft, true)); }));
+browser.tabs.onRemoved.addListener(id => event(async () => { detections.delete(id); await readerPrompts.remove(id); if ((await repository.read()).active?.tabId === id) await repository.update(draft => finalize(draft, true, 'tab-closed')); }));
 event(reconcile);
