@@ -1,7 +1,8 @@
-# ReadChime 0.2.5: notes for Mozilla reviewers
+# ReadChime 0.2.6: notes for Mozilla reviewers
 
-Requested channel: **unlisted / self-distributed**. The developer intends personal
-use and does not request a public AMO listing. This is a Firefox desktop extension.
+Requested channel: **listed / public on addons.mozilla.org**. This is the first
+public release of the existing add-on `readchime@local.invalid`, following
+self-distributed version 0.2.5. This is a Firefox desktop extension.
 
 ReadChime stores a personal reading library, reading-time estimates, and reminder
 settings locally. There is no developer account service, analytics, telemetry,
@@ -48,11 +49,14 @@ plus keyboard navigation of the statistics calendar.
 Current authenticated Google reader layouts and actual cross-application window
 occlusion have not been verified. Version 0.2.1 permanent signed installation and
 restart persistence were verified in an isolated profile; a signed 0.2.5
-package does not exist yet. Version 0.2.5 adds a toolbar badge that mirrors the
+package was not verified by the agent. Version 0.2.5 added a toolbar badge that mirrors the
 reading stopwatch (red "REC" while time is counted, grey "II" while a session is
 paused or waiting) and names the book in the button tooltip. It uses only the
 `browser.action` badge/title APIs from the background script; permissions,
 extension ID, the content script, and data handling are unchanged from 0.2.4.
+Version 0.2.6 changes only the version metadata and public-release documentation;
+runtime behavior is unchanged from 0.2.5. English and Korean listing text and a
+privacy statement accompany the public release.
 
 `web-ext lint` reports two `UNSAFE_VAR_ASSIGNMENT` warnings inside the bundled
 React DOM dependency. Application code does not use `dangerouslySetInnerHTML`,

@@ -1,4 +1,46 @@
-# Mozilla unlisted signing checkpoint
+# Mozilla release checkpoint
+
+## Version 0.2.6 submitted for public listing (2026-10-23)
+
+The user authorized public release and selected the MIT license. The existing
+add-on was reused with ID `readchime@local.invalid`; its public slug is now
+`readchime-one-page-a-day`. Mozilla confirmed the submission and the version
+management page shows **Awaiting Review**. It is not publicly installable yet;
+the author can preview it while signed in. No new distribution agreement was
+presented during this submission.
+
+- Listing: `https://addons.mozilla.org/ko/firefox/addon/readchime-one-page-a-day/`.
+- Version: `https://addons.mozilla.org/ko/developers/addon/readchime-one-page-a-day/versions/6611535`.
+- Extension ZIP: `artifacts/readchime-0.2.6.zip`, SHA-256
+  `7DA4CA6643CD7154778C636CA83BBF1FE97F1D137E094F106647495355098C7E`.
+- Source ZIP: `artifacts/readchime-0.2.6-source.zip`, 70 allowlisted files,
+  SHA-256 `49F231CBB20333D36B976221469EE53F3947BA81EFA3C4FF872DA179C1B9F1C5`.
+  The version page's Current view link confirms the source attachment.
+- Rebuild evidence: `artifacts/readchime-0.2.6-reproducibility.json`.
+- Listing preview: `artifacts/amo-public-0.2.6-preview.png`.
+
+The listing includes English and Korean descriptions, an English/Korean privacy
+statement, MIT license, release notes, three screenshots with demonstration data,
+and a PNG rendered from the existing SVG icon. The user-requested project citation
+is included in both descriptions and the homepage field:
+`https://github.com/nuson999/ReadChime`. Support links to that repository's Issues.
+
+`npm run check` passed: 82 tests, TypeScript, ESLint, build/resource/size checks,
+and zero local Firefox lint errors (two existing bundled React DOM warnings).
+Mozilla's upload validator passed with zero errors and three warnings. Firefox
+desktop is selected; Android is not. The isolated Firefox reader smoke test
+passed, and screenshots were freshly captured in an isolated synthetic profile.
+No authenticated Google account or private reading data was used.
+
+A fresh `npm ci` and `npm run build` from the source ZIP reproduced all 16
+packaged files exactly by SHA-256. After the user selected MIT, LICENSE and package
+license metadata were added to the final source archive and the rebuilt output
+was compared again. The extension ZIP has no runtime changes from 0.2.5 except
+the manifest version. The submitted ZIP is not yet a verified signed XPI.
+
+Mozilla review/publication remains pending. Do not describe the authenticated
+author preview as proof that anonymous users can install it. Release-related
+repository edits are local; no Git push was performed in this release task.
 
 ## Version 0.2.5 prepared for manual upload (2026-10-23)
 
