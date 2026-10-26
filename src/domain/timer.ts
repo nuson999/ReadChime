@@ -54,8 +54,10 @@ export function leave(active: ActiveSession, at: number, reason: StopReason = 'h
   suspend(active);
   expireAway(active, at);
 }
+// awaySince may come from the background clock and `at` from the page, so a page stamp
+// slightly older than awaySince is ordering, not a clock running backwards.
 export function expireAway(active: ActiveSession, at: number): void {
-  if (active.awaySince !== undefined && (at - active.awaySince > READING_GRACE_MS || at < active.awaySince)) { suspend(active, true); stopped(active, 'grace-expired', at); }
+  if (active.awaySince !== undefined && (at - active.awaySince > READING_GRACE_MS || at < active.awaySince - MAX_CLOCK_DRIFT_MS)) { suspend(active, true); stopped(active, 'grace-expired', at); }
 }
 export function resume(active: ActiveSession): void {
   delete active.awaySince;

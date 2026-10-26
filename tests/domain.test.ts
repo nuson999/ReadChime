@@ -6,7 +6,7 @@ import { canonicalBookUrl, readerKey, recommend } from '../src/domain/books';
 import { playBooksDetector } from '../src/domain/detector';
 import { nextAlarm, scheduledToday, shouldPrompt, snoozeAt } from '../src/domain/scheduler';
 import { localDate, weekStart } from '../src/domain/time';
-import { observe, suspend, finish } from '../src/domain/timer';
+import { leave, observe, suspend, finish } from '../src/domain/timer';
 import { dailySeries, summary, goalFor } from '../src/domain/statistics';
 import { LocalRepository, migrate, type StorageAdapter } from '../src/data/repository';
 import { exportBackup, mergeBackup, parseBackup, previewMerge } from '../src/data/backup';
@@ -109,6 +109,11 @@ describe('타이머의 보수적인 상태 전이', () => {
     const timer = active(); const base = Date.parse(now);
     observe(timer, evidence(base)); expect(observe(timer, evidence(base + 5000, true, 'tab', 'Asia/Tokyo'))).toBe('timezone'); observe(timer, evidence(base + 10000, true, 'tab', 'Asia/Tokyo'));
     expect(timer.status).toBe('running'); expect(finish(timer, now, false).map(s => s.durationSeconds)).toEqual([5]);
+  });
+  it('조금 앞선 페이지 시각은 시계 역행으로 보지 않는다', () => {
+    const timer = active(); const base = Date.parse(now);
+    observe(timer, evidence(base)); leave(timer, base + 5010); observe(timer, evidence(base + 5000, false));
+    expect(timer.status).toBe('waiting'); observe(timer, evidence(base + 7000)); expect(timer.status).toBe('running');
   });
   it('숨김과 유예 만료 사유를 기록한다', () => {
     const timer = active(); const base = Date.parse(now);
