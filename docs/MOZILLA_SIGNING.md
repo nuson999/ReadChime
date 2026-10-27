@@ -1,5 +1,27 @@
 # Mozilla release checkpoint
 
+## Version 0.2.8 prepared for manual upload (2026-10-27)
+
+UI-only bug-fix update for the public listing (add-on ID `readchime@local.invalid`).
+The dashboard's goal ring no longer draws the "goal reached" check icon as a large
+rotated arrow: the ring's stylesheet rules now target only the ring's own SVG. The
+user uploads it to AMO.
+
+- Extension ZIP: `artifacts/readchime-0.2.8.zip`, SHA-256
+  `39213AABBDCE1A3014DF0B18AE95993F0BE61FF99DD211826D753D56118B40A2`.
+- Source ZIP: `artifacts/readchime-0.2.8-source.zip`, 70 allowlisted files,
+  SHA-256 `930A9E21E47FA3D237D25F7923C784A102FAF7792236AFCF0D48F2A4CC345F97`.
+- Rebuild evidence: `artifacts/readchime-0.2.8-reproducibility.json`.
+- Release notes: `docs/RELEASE_NOTES_0.2.8.md`.
+
+`npm run check` passed: 90 tests, TypeScript, ESLint, build/resource/size checks,
+and zero local Firefox lint errors (two existing bundled React DOM warnings). A
+fresh `npm ci` and `npm run build` from the source ZIP (Node.js 24.22.1, npm
+11.19.1) reproduced all 16 packaged files exactly by SHA-256. Permissions are
+unchanged from 0.2.7. The fix was checked visually against a static render of the
+ring with the shipped stylesheet; the Firefox smoke tests were not rerun. Mozilla's
+upload validator has not been run yet.
+
 ## Version 0.2.7 prepared for manual upload (2026-10-26)
 
 Bug-fix update for the public listing (same channel as 0.2.6, add-on ID
