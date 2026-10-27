@@ -1,7 +1,7 @@
-# ReadChime 0.2.7: source and reproducible build
+# ReadChime 0.2.8: source and reproducible build
 
 This archive accompanies the publicly listed Firefox desktop extension
-`readchime@local.invalid`, version 0.2.7, submitted to addons.mozilla.org.
+`readchime@local.invalid`, version 0.2.8, submitted to addons.mozilla.org.
 
 ## Build environment
 
@@ -18,7 +18,7 @@ npm run build
 ```
 
 The complete extension is generated in `dist/`. Compare all files in that folder
-with the uploaded `readchime-0.2.7.zip` (ZIP timestamps and compression are irrelevant).
+with the uploaded `readchime-0.2.8.zip` (ZIP timestamps and compression are irrelevant).
 The lockfile pins dependencies, including public React, Recharts, Zod, Vite,
 esbuild, and Tailwind packages. All build tools run locally and are open source.
 Tailwind source detection is explicitly limited to `src/ui/`, so unrelated files,

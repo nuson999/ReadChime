@@ -1,4 +1,4 @@
-# ReadChime 0.2.7: notes for Mozilla reviewers
+# ReadChime 0.2.8: notes for Mozilla reviewers
 
 Requested channel: **listed / public on addons.mozilla.org**. This is a bug-fix
 update to the listed add-on `readchime@local.invalid` (0.2.6 was the first public
@@ -67,6 +67,10 @@ interval and continues on the next visible heartbeat instead of finalizing the
 session. An internal stop reason is kept with the active session and logged to the
 extension console for diagnostics. Permissions, extension ID, and data handling
 are unchanged from 0.2.6.
+Version 0.2.8 is a UI-only fix: a stylesheet rule meant for the dashboard's goal
+ring also matched the small check icon inside it, enlarging and rotating it. The
+rule now targets only the ring. Permissions, extension ID, content script, and data handling are unchanged
+from 0.2.7.
 
 `web-ext lint` reports two `UNSAFE_VAR_ASSIGNMENT` warnings inside the bundled
 React DOM dependency. Application code does not use `dangerouslySetInnerHTML`,
