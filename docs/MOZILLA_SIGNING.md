@@ -1,5 +1,29 @@
 # Mozilla release checkpoint
 
+## Version 0.2.9 prepared for manual upload (2026-11-01)
+
+UI-only visual polish for the public listing (add-on ID `readchime@local.invalid`):
+spacing on a 4px grid, a neutral dark theme, inline SVG icons in place of text
+arrows, lighter heading weights, and library spines that show the book's title.
+The user uploads it to AMO.
+
+- Extension ZIP: `artifacts/readchime-0.2.9.zip`, SHA-256
+  `596D298B6F4F125430BC13C2D0300DBAE4C82F0E4B660B197852472267BD68AF`.
+- Source ZIP: `artifacts/readchime-0.2.9-source.zip`, 70 allowlisted files,
+  SHA-256 `AFC37CE24649FCFB74396AD749949E13D6D1170BB442AF83DAC4300F36F383B6`.
+- Rebuild evidence: `artifacts/readchime-0.2.9-reproducibility.json`.
+- Release notes: `docs/RELEASE_NOTES_0.2.9.md`.
+
+`npm run check` passed: 90 tests, TypeScript, ESLint, build/resource/size checks,
+and zero local Firefox lint errors (two existing bundled React DOM warnings). A
+fresh `npm ci` and `npm run build` from the source ZIP (Node.js 24.22.1, npm
+11.19.1) reproduced all 16 packaged files exactly by SHA-256. The source ZIP is
+made with `git -c core.autocrlf=false archive` so text files keep LF endings; with
+autocrlf on, the copied manifest, HTML, icon and locale files come out CRLF and
+no longer match. Permissions are unchanged from 0.2.8. All screens were checked in
+seeded light/dark, Korean/English screenshots; the Firefox smoke tests were not
+rerun. Mozilla's upload validator has not been run yet.
+
 ## Version 0.2.8 prepared for manual upload (2026-10-27)
 
 UI-only bug-fix update for the public listing (add-on ID `readchime@local.invalid`).
