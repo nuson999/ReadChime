@@ -11,12 +11,15 @@ const paths = {
     play: 'M8 5.5v13l10.5-6.5z',
     close: 'M6 6l12 12M18 6 6 18',
     lock: 'M6 11h12v9H6zM8.5 11V8a3.5 3.5 0 0 1 7 0v3',
+    plus: 'M12 5v14M5 12h14',
+    arrow: 'M5 12h14M13 6l6 6-6 6',
+    external: 'M14 4h6v6M20 4l-9 9M18 14v6H4V6h6',
 } as const;
 export type IconName = keyof typeof paths;
-export function Icon({ name, size = 18, className = '' }: {
+export function Icon({ name, size = 16, className = '' }: {
     name: IconName;
     size?: number;
     className?: string;
 }) {
-    return <svg className={`icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill={name === 'play' ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={name === 'play' ? 1.5 : 1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false"><path d={paths[name]}/></svg>;
+    return <svg className={`icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill={name === 'play' ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false"><path d={paths[name]}/></svg>;
 }

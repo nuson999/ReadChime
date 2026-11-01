@@ -52,7 +52,7 @@ try {
   checked(`Firefox ${(await driver.getCapabilities()).get('browserVersion')} 임시 확장 설치와 대시보드 로드`);
   let state = (await command({ type: 'GET_STATE' })).snapshot.state; assert.equal(state.sessions.length, 0); assert.equal(state.books.length, 0);
   checked('첫 실행의 빈 기록과 0분 표시');
-  await driver.findElement(By.css('nav a[href="#library"]')).click(); await clickText('＋ 책 추가');
+  await driver.findElement(By.css('nav a[href="#library"]')).click(); await clickText('책 추가');
   await setField('책 제목', '검증용 책 · 실제 독서 아님'); await setField('저자 (선택)', '자동화 검증');
   await driver.findElement(By.css('[role="dialog"] textarea')).sendKeys('<img src=x onerror=alert(1)>');
   await driver.findElement(By.css('[role="dialog"] button.primary')).click();
@@ -60,7 +60,7 @@ try {
   state = (await command({ type: 'GET_STATE' })).snapshot.state; assert.equal(state.books.length, 1); const bookId = state.books[0].id;
   assert.equal((await driver.findElements(By.css('.book-note img'))).length, 0);
   checked('서재 UI 추가 및 메모 HTML의 텍스트 처리');
-  await driver.findElement(By.css('nav a[href="#history"]')).click(); await clickText('＋ 독서 시간 직접 기록');
+  await driver.findElement(By.css('nav a[href="#history"]')).click(); await clickText('독서 시간 직접 기록');
   await driver.findElement(By.css('[role="dialog"] input[type="checkbox"]')).click();
   await driver.findElement(By.css('[role="dialog"] button.primary')).click();
   await driver.wait(async () => (await command({ type: 'GET_STATE' })).snapshot.state.sessions.length === 1, 5000);

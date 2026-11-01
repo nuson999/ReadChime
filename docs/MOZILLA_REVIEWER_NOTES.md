@@ -1,4 +1,4 @@
-# ReadChime 0.2.8: notes for Mozilla reviewers
+# ReadChime 0.2.9: notes for Mozilla reviewers
 
 Requested channel: **listed / public on addons.mozilla.org**. This is a bug-fix
 update to the listed add-on `readchime@local.invalid` (0.2.6 was the first public
@@ -71,6 +71,10 @@ Version 0.2.8 is a UI-only fix: a stylesheet rule meant for the dashboard's goal
 ring also matched the small check icon inside it, enlarging and rotating it. The
 rule now targets only the ring. Permissions, extension ID, content script, and data handling are unchanged
 from 0.2.7.
+Version 0.2.9 is a UI-only visual polish of the dashboard and popup: spacing,
+colors, font weights, inline SVG icons replacing text arrows, and library book
+spines that show the book's title. Permissions, extension ID, content script,
+background logic, and data handling are unchanged from 0.2.8.
 
 `web-ext lint` reports two `UNSAFE_VAR_ASSIGNMENT` warnings inside the bundled
 React DOM dependency. Application code does not use `dangerouslySetInnerHTML`,

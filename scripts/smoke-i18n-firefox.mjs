@@ -98,7 +98,7 @@ try {
   assert.equal(await driver.getTitle(), 'ReadChime · 독서 대시보드');
   await writeFile(path.join(temporary, 'i18n-ko-settings.png'), await driver.takeScreenshot(), 'base64');
   await driver.switchTo().window(popup); await waitLanguage('ko');
-  assert.equal(await driver.findElement(By.css('.popup-header button')).getText(), '대시보드 ↗');
+  assert.equal(await driver.findElement(By.css('.popup-header button')).getText(), '대시보드');
   checked('Saving Korean updates the open dashboard and popup, including document language/title');
   await driver.switchTo().window(dashboard);
   const before = (await command({ type: 'GET_STATE' })).snapshot.state;
